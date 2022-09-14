@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>ws-ephemeral</Name>
+  <Repository>dhruvinsh/ws-ephemeral:lastest</Repository>
+  <Registry>https://hub.docker.com/r/dhruvinsh/ws-ephemeral</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/dhruvinsh/ws-ephemeral/discussions</Support>
+  <Project>https://github.com/dhruvinsh/ws-ephemeral</Project>
+  <Overview>For windscribe VPN user this tool allows you to automate the opening ephemeral port. For example P2P application behind VPN requires UDP port open, while using VPN, ephemeral port is great option but it comes with 7 days expiry.<br>This tool allows you to automate that part.</Overview>
+  <Category>Tools:</Category>
+  <WebUI/>
+  <TemplateURL></TemplateURL>
+  <Icon>https://cdn.jsdelivr.net/gh/dhruvinsh/unraid-icons@master/icons/png/windscribe.png</Icon>
+  <ReadMe>https://github.com/dhruvinsh/ws-ephemeral/blob/main/README.md</ReadMe>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <Date>2022-09-09</Date>
+  <License>GPL v3</License>
+  <ExtraSearchTerms>VPN windscribe</ExtraSearchTerms>
+  <Requires/>
+  <Config Name="WS_USERNAME" Target="WS_USERNAME" Default="" Mode="" Description="windscribe username" Type="Variable" Display="always" Required="true" Mask="false" />
+  <Config Name="WS_PASSWORD" Target="WS_PASSWORD" Default="" Mode="" Description="windscribe password" Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="WS_EPHEMERAL_PORT" Target="WS_EPHEMERAL_PORT" Default="" Mode="" Description="Valid ephemeral port number need to be inbetween 2000 to 65365." Type="Variable" Display="always" Required="true" Mask="false"/>
+</Container>
