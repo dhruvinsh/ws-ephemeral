@@ -14,4 +14,8 @@ Work in progress.
 
 ## Privacy
 
-I assure you that nothing being collected or logged. If you have further question option the issue here or check the source code.
+I assure you that nothing is being collected or logged. Your credentials are safe and set via environment variable only. Still If you have further questions or concerns, please open an issue here.
+
+## License
+
+[GPL3](LICENSE.md)
