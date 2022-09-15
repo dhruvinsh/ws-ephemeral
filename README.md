@@ -5,8 +5,16 @@ This project aims to automate setting up ephemeral port on windscribe VPN servic
 ## Docker Setup
 
 ```bash
-docker run -e WS_USERNAME=username -e WS_PASSWORD=password -e WS_EPHEMERAL_PORT=40000 dhruvinsh/ws-ephemeral
+docker run -e WS_USERNAME=username -e WS_PASSWORD=password -e WS_EPHEMERAL_PORT=40000 dhruvinsh/ws-ephemeral:latest
 ```
+
+Available tags for docker image:
+
+| Tag    | Container type                                |
+| ------ | --------------------------------------------- |
+| latest | most recent changes straight from main branch |
+| 1.x.x  | specific build from v1                        |
+| x      | major version with all the patches            |
 
 ## Unraid Setup
 
