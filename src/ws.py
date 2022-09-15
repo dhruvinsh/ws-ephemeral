@@ -120,7 +120,12 @@ class Windscribe:
         self.csrf = self._renew_csrf()
 
         self._delete_ephm_port()
-        self._set_ephm_port()
+        res = self._set_ephm_port()
+
+        if res["success"] == 1:
+            self.logger.info("Port renewed successfully.")
+        else:
+            self.logger.error("Port renewal failed, check config or open suport ticket")
 
     def close(self) -> None:
         """close httpx session"""
