@@ -18,7 +18,7 @@ Available tags for docker image:
 
 ## Unraid Setup
 
-Work in progress.
+Unraid template is now available under communinty application.
 
 ## Privacy
 
