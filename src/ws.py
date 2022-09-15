@@ -9,7 +9,7 @@ Windscribe module allow to setup the ephemeral port
 
 import logging
 import re
-from typing import Union
+from typing import TypedDict, Union
 
 import httpx
 
@@ -17,6 +17,13 @@ import config
 from logger import create_logger
 
 logger = create_logger("ws")
+
+
+class Csrf(TypedDict):
+    """CSRF type dict"""
+
+    csrf_time: int
+    csrf_token: str
 
 
 class Windscribe:
@@ -36,16 +43,16 @@ class Windscribe:
         self.client = httpx.Client(headers=headers, cookies=config.COOKIES)
 
         # we will populate this later in the login call
-        self.csrf = self._get_csrf()
+        self.csrf: Csrf = self._get_csrf()
 
         self.logger = logger
 
-    def _get_csrf(self) -> dict[str, Union[str, int]]:
+    def _get_csrf(self) -> Csrf:
         """windscribe make seperate request to get the csrf token"""
         resp = self.client.post(config.CSRF_URL)
         return resp.json()
 
-    def _renew_csrf(self) -> dict[str, Union[str, int]]:
+    def _renew_csrf(self) -> Csrf:
         """after login windscribe issue new csrf token withing javascript"""
         resp = self.client.get(config.MYACT_URL)
         csrf_time = re.search(r"csrf_time = (?P<ctime>\d+)", resp.text)
@@ -56,8 +63,8 @@ class Windscribe:
         if csrf_token is None:
             raise ValueError("Can not work further, csrf_token not found, exited.")
 
-        new_csrf = {
-            "csrf_time": csrf_time.groupdict()["ctime"],
+        new_csrf: Csrf = {
+            "csrf_time": int(csrf_time.groupdict()["ctime"]),
             "csrf_token": csrf_token.groupdict()["ctoken"],
         }
 
