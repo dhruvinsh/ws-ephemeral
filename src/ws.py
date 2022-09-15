@@ -68,7 +68,7 @@ class Windscribe:
             "csrf_token": csrf_token.groupdict()["ctoken"],
         }
 
-        self.logger.info("csrf renewed successfully.")
+        self.logger.debug("csrf renewed successfully.")
         return new_csrf
 
     def _login(self) -> None:
@@ -83,7 +83,7 @@ class Windscribe:
             "code": "",
         }
         self.client.post(config.LOGIN_URL, data=data)
-        self.logger.info("login successful")
+        self.logger.debug("login successful")
 
     def _delete_ephm_port(self) -> dict[str, Union[bool, int]]:
         """
@@ -95,7 +95,7 @@ class Windscribe:
         }
         resp = self.client.post(config.DEL_EPHEM_URL, data=data)
         res = resp.json()
-        self.logger.info("ephimeral port deleted: %s", res)
+        self.logger.debug("ephimeral port deleted: %s", res)
 
         return res
 
@@ -107,7 +107,7 @@ class Windscribe:
         }
         resp = self.client.post(config.SET_EPHEM_URL, data=data)
         res = resp.json()
-        self.logger.info("new ephimeral port set: %s", res)
+        self.logger.debug("new ephimeral port set: %s", res)
 
         return res
 
@@ -129,7 +129,7 @@ class Windscribe:
 
     def close(self) -> None:
         """close httpx session"""
-        self.logger.info("closing session")
+        self.logger.debug("closing session")
         self.client.close()
 
 
