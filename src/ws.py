@@ -35,6 +35,7 @@ class Windscribe:
             "origin": config.BASE_URL,
             "referer": config.LOGIN_URL,
             # pylint: disable=line-too-long
+            # ruff: noqa: E501
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
         }
         self.client = httpx.Client(headers=headers, cookies=config.COOKIES)
