@@ -14,9 +14,6 @@ from typing import TypedDict, Union
 import httpx
 
 import config
-from logger import create_logger
-
-logger = create_logger("ws")
 
 
 class Csrf(TypedDict):
@@ -33,7 +30,7 @@ class Windscribe:
     """
 
     # pylint: disable=redefined-outer-name
-    def __init__(self, logger: logging.Logger) -> None:
+    def __init__(self) -> None:
         headers = {
             "origin": config.BASE_URL,
             "referer": config.LOGIN_URL,
@@ -45,7 +42,7 @@ class Windscribe:
         # we will populate this later in the login call
         self.csrf: Csrf = self._get_csrf()
 
-        self.logger = logger
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def _get_csrf(self) -> Csrf:
         """windscribe make seperate request to get the csrf token"""
@@ -143,6 +140,6 @@ def reset_ephemeral_port() -> None:
     - set new ports
     - clean up the session
     """
-    ws = Windscribe(logger=logger)
+    ws = Windscribe()
     ws.setup()
     ws.close()

@@ -1,16 +1,19 @@
 """
 config module
 """
+import logging
 import os
 import sys
+from pathlib import Path
 from typing import Optional
 
 import httpx
 
-from logger import create_logger
 from util import validate_port
 
-logger = create_logger("config")
+logger = logging.getLogger(__name__)
+
+BASE_PATH: Path = Path(".")
 
 # common config
 CSRF_URL: str = "https://res.windscribe.com/res/logintoken"

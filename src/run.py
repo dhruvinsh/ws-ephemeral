@@ -1,18 +1,20 @@
 """
 Module that run the setup for windscrib's ephemeral port
 """
+import logging
 import time
 
 from tqdm import trange
 
-from logger import create_logger
+from logger import setup_logging
 from util import to_seconds
 from ws import reset_ephemeral_port
 
+setup_logging()
+logger = logging.getLogger(__name__)
+
 # wait befor setting the ephemeral ports
 DAYS: int = 7
-
-logger = create_logger("run")
 
 while True:
     logger.info("setting the ephemeral port")
