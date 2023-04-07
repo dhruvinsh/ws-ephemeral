@@ -1,0 +1,7 @@
+version: "3.8"
+
+service:
+  ws-ephemeral:
+    container_name: ws-ephemeral
+    image: dhruvinsh/ws-ephemeral:latest
+    restart: unless-stopped
