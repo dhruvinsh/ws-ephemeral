@@ -18,6 +18,7 @@ mypy = ">=0.971"
 black = ">=22.6.0"
 pylint = ">=2.14.5"
 isort = ">=5.10.1"
+types-pyyaml = "^6.0.12.9"
 
 [tool.pylint.basic]
 good-names = ["ws"]
