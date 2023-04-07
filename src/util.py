@@ -12,7 +12,7 @@ def validate_port(value: Optional[str]) -> int:
 
     port = int(value.strip())
     if 2000 > port or 65365 < port:
-        raise ValueError("Valid port nubmer need to be within 2000 to 65365 port range")
+        raise ValueError("Valid port number need to be within 2000 to 65365 port range")
 
     return port
 

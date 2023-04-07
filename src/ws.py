@@ -135,7 +135,7 @@ def reset_ephemeral_port() -> None:
     Steps:
     - login to windscribe
     - fetch new csrf token
-    - go to my account
+    - go to "my account"
     - delete ephemeral ports (disregard existance of one or not)
     - set new ports
     - clean up the session
