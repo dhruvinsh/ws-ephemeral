@@ -25,19 +25,19 @@ Unraid template is now available under communinty application.
 v1.2.0 - 7th April 2023
 Better progress bar added with better way of logging message on the console. Also preparing system for the next v2.0.0 release with qbit support
 
-3a661b6 package(s): adding pyyaml types
-d148a67 lint(ruff): ignore line-too-long
-e64f818 minor spelling correction
-ef107ef logger: better way of logging added
-b299d21 package(s): adding pyyaml
-d3095e3 package(s): adding tqdm with stub
-38be3f5 docker: copose file added for easy usage
-5eea287 docker: bump python version to 3.11
-ce4fad8 pre-commit: adding pre-commit hook
-3ba34d8 env: updating requirement files
-d0e7ede env: updating poetry lock
-84641c5 packages: adding qbit api
-5733d1b packages: bump to latest version
+- 3a661b6 package(s): adding pyyaml types
+- d148a67 lint(ruff): ignore line-too-long
+- e64f818 minor spelling correction
+- ef107ef logger: better way of logging added
+- b299d21 package(s): adding pyyaml
+- d3095e3 package(s): adding tqdm with stub
+- 38be3f5 docker: copose file added for easy usage
+- 5eea287 docker: bump python version to 3.11
+- ce4fad8 pre-commit: adding pre-commit hook
+- 3ba34d8 env: updating requirement files
+- d0e7ede env: updating poetry lock
+- 84641c5 packages: adding qbit api
+- 5733d1b packages: bump to latest version
 
 ## Privacy
 
