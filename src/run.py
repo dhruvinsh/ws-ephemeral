@@ -29,6 +29,12 @@ def main() -> None:
     port = ws.setup()
     ws.close()
 
+    if not config.QBIT_FOUND:
+        logger.warning(
+            "Read the latest doc: https://github.com/dhruvinsh/ws-ephemeral#readme"
+        )
+        return
+
     try:
         qbit = QbitManager(
             host=config.QBIT_HOST,
