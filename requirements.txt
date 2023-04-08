@@ -148,6 +148,9 @@ requests==2.28.2 ; python_version >= "3.11" and python_version < "4" \
 rfc3986[idna2008]==1.5.0 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:270aaf10d87d0d4e095063c65bf3ddbc6ee3d0b226328ce21e036f946e421835 \
     --hash=sha256:a86d6e1f5b1dc238b218b012df0aa79409667bb209e58da56d0b94704e712a97
+semver==3.0.0 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:94df43924c4521ec7d307fc86da1531db6c2c33d9d5cdc3e64cca0eb68569269 \
+    --hash=sha256:ab4f69fb1d1ecfb5d81f96411403d7a611fa788c45d252cf5b408025df3ab6ce
 setuptools==67.6.1 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:257de92a9d50a60b8e22abfcbb771571fde0dbf3ec234463212027a4eeecbe9a \
     --hash=sha256:e728ca814a823bf7bf60162daf9db95b93d532948c4c0bea762ce62f60189078
