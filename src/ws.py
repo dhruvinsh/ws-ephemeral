@@ -30,7 +30,7 @@ class Windscribe:
     """
 
     # pylint: disable=redefined-outer-name
-    def __init__(self) -> None:
+    def __init__(self, username: str, password: str) -> None:
         headers = {
             "origin": config.BASE_URL,
             "referer": config.LOGIN_URL,
@@ -42,6 +42,8 @@ class Windscribe:
 
         # we will populate this later in the login call
         self.csrf: Csrf = self._get_csrf()
+        self.username = username
+        self.password = password
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -76,8 +78,8 @@ class Windscribe:
             "upgrade": 0,
             "csrf_time": self.csrf["csrf_time"],
             "csrf_token": self.csrf["csrf_token"],
-            "username": config.USERNAME,
-            "password": config.PASSWORD,
+            "username": self.username,
+            "password": self.password,
             "code": "",
         }
         self.client.post(config.LOGIN_URL, data=data)
@@ -97,9 +99,13 @@ class Windscribe:
 
         return res
 
-    def _set_ephm_port(self) -> dict[str, Union[dict[str, Union[str, int]], int]]:
+    def _set_matching_port(self) -> int:
+        """
+        setup matching ephemeral port on WS
+        """
         data = {
-            "port": config.PORT,
+            # keeping port empty makes it to request matching port
+            "port": "",
             "ctime": self.csrf["csrf_time"],
             "ctoken": self.csrf["csrf_token"],
         }
@@ -107,9 +113,19 @@ class Windscribe:
         res = resp.json()
         self.logger.debug("new ephimeral port set: %s", res)
 
-        return res
+        if res["success"] != 1:
+            raise ValueError("Not able to setup matching ephemeral port.")
 
-    def setup(self) -> None:
+        # lets make sure we actually had matching port
+        external: int = res["epf"]["ext"]
+        internal: int = res["epf"]["int"]
+
+        if external != internal:
+            raise ValueError("Port setup done but matching port not found.")
+
+        return internal
+
+    def setup(self) -> int:
         """perform ephemeral port setup here"""
         self._login()
 
@@ -118,29 +134,9 @@ class Windscribe:
         self.csrf = self._renew_csrf()
 
         self._delete_ephm_port()
-        res = self._set_ephm_port()
-
-        if res["success"] == 1:
-            self.logger.info("Port renewed successfully.")
-        else:
-            self.logger.error("Port renewal failed, check config or open suport ticket")
+        return self._set_matching_port()
 
     def close(self) -> None:
         """close httpx session"""
         self.logger.debug("closing session")
         self.client.close()
-
-
-def reset_ephemeral_port() -> None:
-    """Main function responsible for resetting the ephemeral port.
-    Steps:
-    - login to windscribe
-    - fetch new csrf token
-    - go to "my account"
-    - delete ephemeral ports (disregard existance of one or not)
-    - set new ports
-    - clean up the session
-    """
-    ws = Windscribe()
-    ws.setup()
-    ws.close()

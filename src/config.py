@@ -5,11 +5,8 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Optional
 
 import httpx
-
-from util import validate_port
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +24,12 @@ EPHEM_URL: str = STATICIP + "load"
 DEL_EPHEM_URL: str = STATICIP + "deleteEphPort"
 SET_EPHEM_URL: str = STATICIP + "postEphPort"
 
-USERNAME: Optional[str] = os.environ.get("WS_USERNAME")
-PASSWORD: Optional[str] = os.environ.get("WS_PASSWORD")
-PORT: int = validate_port(os.environ.get("WS_EPHEMERAL_PORT"))
+# WS config
+WS_USERNAME: str = os.getenv("WS_USERNAME", "")
+WS_PASSWORD: str = os.getenv("WS_PASSWORD", "")
 
-if not all([USERNAME, PASSWORD]):
-    logger.error("Environment variables: Username and Password need to be set")
+if not all([WS_USERNAME, WS_PASSWORD]):
+    logger.error("ENV: WS_USERNAME and WS_PASSWORD need to be set")
     sys.exit(1)
 
 # some HTML id for the login purpose
@@ -43,3 +40,19 @@ PASSWORD_ID: str = "password"
 COOKIES = httpx.Cookies()
 COOKIES.set("i_can_has_cookie", "1")
 COOKIES.set("ref", "https://windscribe.com/")
+
+
+# fmt: off
+# some qbitconfig
+QBIT_USERNAME: str = os.getenv("QBIT_USERNAME", "")
+QBIT_PASSWORD: str = os.getenv("QBIT_PASSWORD", "")
+QBIT_HOST: str     = os.getenv("QBIT_HOST", "")
+QBIT_PORT: int     = int(os.getenv("QBIT_PORT", "0"))
+# fmt: on
+
+if not all([QBIT_USERNAME, QBIT_PASSWORD]):
+    logger.error("ENV: QBIT_USERNAME and QBIT_PASSWORD need to be set")
+    sys.exit(1)
+
+_QBIT_PRIVATE_TRACKER: str = os.getenv("QBIT_PRIVATE_TRACKER", "false")
+QBIT_PRIVATE_TRACKER: bool = True if _QBIT_PRIVATE_TRACKER.lower() == "true" else False
