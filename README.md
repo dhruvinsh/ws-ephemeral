@@ -23,6 +23,7 @@ Unraid template is now available under communinty application.
 ## Changelog
 
 v1.2.0 - 7th April 2023
+
 Better progress bar added with better way of logging message on the console. Also preparing system for the next v2.0.0 release with qbit support
 
 - 3a661b6 package(s): adding pyyaml types
