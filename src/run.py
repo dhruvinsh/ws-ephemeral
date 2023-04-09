@@ -13,6 +13,7 @@ from util import to_seconds
 from ws import Windscribe
 
 setup_logging()
+
 logger = logging.getLogger("main")
 
 # wait befor setting the ephemeral ports
@@ -21,9 +22,11 @@ DAYS: int = 7
 
 def main() -> None:
     """Main function responsible for setting up ws and qbit.
+
     Steps:
     - login to ws
-    - set new matching ports
+    - setup new matching ports
+    - setup qbit
     """
     ws = Windscribe(username=config.WS_USERNAME, password=config.WS_PASSWORD)
     port = ws.setup()
