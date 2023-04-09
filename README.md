@@ -4,21 +4,59 @@ This project aims to automate setting up ephemeral port on windscribe VPN servic
 
 ## Docker Setup
 
+**NOTE**: updating to latest version will not break existing system but it is not advice to use it any longer. Proper environment values (see below) need to be set for qbit.
+
+
+**V1 setup (NOT ADVISED TO USE ANYMORE)**
 ```bash
-docker run -e WS_USERNAME=username -e WS_PASSWORD=password -e WS_EPHEMERAL_PORT=40000 dhruvinsh/ws-ephemeral:latest
+docker run -e WS_USERNAME=username -e WS_PASSWORD=password -e dhruvinsh/ws-ephemeral:latest
 ```
+
+
+**V2 setup**
+```bash
+docker run \
+-e WS_USERNAME=username \
+-e WS_PASSWORD=password \
+-e QBIT_USERNAME=username \
+-e QBIT_PASSWORD=password  \
+-e QBIT_HOST=http://192.168.1.10 \
+-e QBIT_PORT=8080 \
+-e QBIT_PRIVATE_TRACKER=true \
+dhruvinsh/ws-ephemeral:latest
+```
+
+Docker compose file is provided for example, make some adjustment and run as,
+```bash
+docker compose up -d
+```
+
+### Tags
 
 Available tags for docker image:
 
-| Tag    | Container type                                |
-| ------ | --------------------------------------------- |
-| latest | most recent changes straight from main branch |
-| 1.x.x  | specific build from v1                        |
-| x      | major version with all the patches            |
+| Tag    | Container Type                                                                     |
+|--------|------------------------------------------------------------------------------------|
+| latest | most recent changes straight from main branch                                      |
+| 2.x.x  | Specific build from v2 with qbit and matching port support                         |
+| 1.x.x  | Specific build from v1 with no qbit or matching port support (in maintenance mode) |
+| x      | specific major versoin with all patches                                            |
+
+### Environment Variables
+
+| Variable             | Comment                                                                          | Applicable Version |
+|----------------------|----------------------------------------------------------------------------------|--------------------|
+| WS_USERNAME          | WS username                                                                      | v1.x.x and v2.x.x  |
+| WS_PASSWORD          | WS password                                                                      | v1.x.x and v2.x.x  |
+| QBIT_USERNAME        | QBIT username                                                                    | v2.x.x             |
+| QBIT_PASSWORD        | QBIT password                                                                    | v2.x.x             |
+| QBIT_HOST            | QBIT web address like, https://qbit.xyz.com or http://192.168.1.10               | v2.x.x             |
+| QBIT_PORT            | QBIT web port number like, 443 or 8080                                           | v2.x.x             |
+| QBIT_PRIVATE_TRACKER | get QBIT ready for private tracker by disabling dht, pex and lsd (true or false) | v2.x.x             |
 
 ## Unraid Setup
 
-Unraid template is now available under communinty application.
+Unraid template is now available under community application.
 
 ## Changelog
 
