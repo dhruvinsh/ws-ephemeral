@@ -60,10 +60,28 @@ Unraid template is now available under community application.
 
 ## Changelog
 
+v2.0.0 - 9th April 2023
+- 8493fe1 (HEAD -> main) README updated
+- 64f68a7 docker: update to setup
+- a3f6c51 docker-compose example added
+- bc5ea90 main: tqdm message
+- a1cd806 chore: minor doc improvement
+- 4ce2ef0 config: for now not using logging here
+- 25a43d2 logging: disable existing logger
+- 9a9a627 lib: proper protection for qbit
+- 4945f8f qbit: do not break existing system
+- 187cd5c Qbit: big update, qbit support added
+- 33bafaa package(s): semver added
+- 43e478e README: fixing another mess
+- fe81416 README: fixing changelog
+
+
 v1.2.0 - 7th April 2023
 
 Better progress bar added with better way of logging message on the console. Also preparing system for the next v2.0.0 release with qbit support
 
+- 2a1a382 (tag: v1.2.0) README: changelog added
+- a985fa6 package(s): update to latest version
 - 3a661b6 package(s): adding pyyaml types
 - d148a67 lint(ruff): ignore line-too-long
 - e64f818 minor spelling correction
@@ -77,6 +95,7 @@ Better progress bar added with better way of logging message on the console. Als
 - d0e7ede env: updating poetry lock
 - 84641c5 packages: adding qbit api
 - 5733d1b packages: bump to latest version
+
 
 ## Privacy
 
