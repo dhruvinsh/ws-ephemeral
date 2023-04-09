@@ -1,14 +1,11 @@
 """
 config module
 """
-import logging
 import os
 import sys
 from pathlib import Path
 
 import httpx
-
-logger = logging.getLogger(__name__)
 
 BASE_PATH: Path = Path(".")
 
@@ -29,7 +26,7 @@ WS_USERNAME: str = os.getenv("WS_USERNAME", "")
 WS_PASSWORD: str = os.getenv("WS_PASSWORD", "")
 
 if not all([WS_USERNAME, WS_PASSWORD]):
-    logger.error("ENV: WS_USERNAME and WS_PASSWORD need to be set")
+    print("ENV: WS_USERNAME and WS_PASSWORD need to be set")
     sys.exit(1)
 
 # some HTML id for the login purpose
@@ -54,7 +51,7 @@ QBIT_FOUND = True
 # if user is running latest build without qbit env then let them run but disable the
 # qbit functions
 if QBIT_USERNAME == "default123!!" or QBIT_PASSWORD == "default123!!":
-    logger.warning("QBIT related setup not found, setup env as soon as possible")
+    print("QBIT related setup not found, setup env as soon as possible")
     QBIT_FOUND = False
 
 _QBIT_PRIVATE_TRACKER: str = os.getenv("QBIT_PRIVATE_TRACKER", "false")
