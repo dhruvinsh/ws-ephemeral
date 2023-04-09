@@ -59,5 +59,5 @@ while True:
     main()
 
     logger.info("going to wait patiently for %s days befor next reset", DAYS)
-    for _ in trange(to_seconds(DAYS)):
+    for _ in trange(to_seconds(DAYS), desc="Waiting for next rest:"):
         time.sleep(1)
