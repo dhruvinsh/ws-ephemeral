@@ -16,7 +16,11 @@ class QbitManager:
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.client = Client(host, port, username, password, SIMPLE_RESPONSES=True)
-        self.api = Version.parse(self.client.app_web_api_version())
+        try:
+            self.api = Version.parse(self.client.app_web_api_version())
+        except Exception as e:
+            self.logger.error("cannot work with qbit.")
+            raise e
 
     def __getattribute__(self, __name: str) -> Any:
         """
