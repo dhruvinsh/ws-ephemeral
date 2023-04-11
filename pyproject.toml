@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "windscribe"
-version = "0.1.0"
-description = "request ephemeral port"
+name = "ws-ephemeral"
+version = "2.0.0"
+description = "request matching ephemeral port"
 authors = ["Dhruvin Shah <dhruvin3@gmail.com>"]
 
 [tool.poetry.dependencies]
