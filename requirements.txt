@@ -89,13 +89,13 @@ colorama==0.4.6 ; python_version >= "3.11" and python_version < "4.0" and platfo
 h11==0.14.0 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d \
     --hash=sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761
-httpcore==0.16.3 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:c5d6f04e2fc530f39e0c077e6a30caa53f1451096120f1f38b954afd0b17c0cb \
-    --hash=sha256:da1fb708784a938aa084bde4feb8317056c55037247c787bd7e19eb2c2949dc0
-httpx==0.23.3 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:9818458eb565bb54898ccb9b8b251a28785dd4a55afbc23d0eb410754fe7d0f9 \
-    --hash=sha256:a211fcce9b1254ea24f0cd6af9869b3d29aba40154e947d2a07bb499b3e310d6
-idna==3.4 ; python_version >= "3.11" and python_version < "4" \
+httpcore==0.17.0 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:0fdfea45e94f0c9fd96eab9286077f9ff788dd186635ae61b312693e4d943599 \
+    --hash=sha256:cc045a3241afbf60ce056202301b4d8b6af08845e3294055eb26b09913ef903c
+httpx==0.24.0 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:447556b50c1921c351ea54b4fe79d91b724ed2b027462ab9a329465d147d5a4e \
+    --hash=sha256:507d676fc3e26110d41df7d35ebd8b3b8585052450f4097401c9be59d928c63e
+idna==3.4 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4 \
     --hash=sha256:90b77e79eaa3eba6de819a0c442c0b4ceefc341a7a2ab77d7562bf49f425c5c2
 pyyaml==6.0 ; python_version >= "3.11" and python_version < "4.0" \
@@ -139,15 +139,12 @@ pyyaml==6.0 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:dbad0e9d368bb989f4515da330b88a057617d16b6a8245084f1b05400f24609f \
     --hash=sha256:e61ceaab6f49fb8bdfaa0f92c4b57bcfbea54c09277b1b4f7ac376bfb7a7c174 \
     --hash=sha256:f84fbc98b019fef2ee9a1cb3ce93e3187a6df0b2538a651bfb890254ba9f90b5
-qbittorrent-api==2023.3.44 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:272adee97d92174d4fbb85b0c1c67aad2d651dfcfb04fb5ee4a5b4224547cb4e \
-    --hash=sha256:ea6757fd6b40c2c6c0bb668efbcc2ba94f650b5787481668e3a692dbaa9f4868
+qbittorrent-api==2023.4.45 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:266ab9892a0326525aefbd97aa2e3957eb2c86b50260a7d1c6351455cc805f6e \
+    --hash=sha256:d4fab04f265de52e333345e20fa0570e28ba5ea2cdc833c7e0dc908b2e8605fa
 requests==2.28.2 ; python_version >= "3.11" and python_version < "4" \
     --hash=sha256:64299f4909223da747622c030b781c0d7811e359c37124b4bd368fb8c6518baa \
     --hash=sha256:98b1b2782e3c6c4904938b84c0eb932721069dfdb9134313beff7c83c2df24bf
-rfc3986[idna2008]==1.5.0 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:270aaf10d87d0d4e095063c65bf3ddbc6ee3d0b226328ce21e036f946e421835 \
-    --hash=sha256:a86d6e1f5b1dc238b218b012df0aa79409667bb209e58da56d0b94704e712a97
 semver==3.0.0 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:94df43924c4521ec7d307fc86da1531db6c2c33d9d5cdc3e64cca0eb68569269 \
     --hash=sha256:ab4f69fb1d1ecfb5d81f96411403d7a611fa788c45d252cf5b408025df3ab6ce
