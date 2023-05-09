@@ -28,9 +28,8 @@ def main() -> None:
     - setup new matching ports
     - setup qbit
     """
-    ws = Windscribe(username=config.WS_USERNAME, password=config.WS_PASSWORD)
-    port = ws.setup()
-    ws.close()
+    with Windscribe(username=config.WS_USERNAME, password=config.WS_PASSWORD) as ws:
+        port = ws.setup()
 
     if not config.QBIT_FOUND:
         logger.warning(

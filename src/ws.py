@@ -47,6 +47,14 @@ class Windscribe:
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
+    def __enter__(self) -> "Windscribe":
+        """context manager entry"""
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """close httpx session"""
+        self.close()
+
     def _get_csrf(self) -> Csrf:
         """windscribe make seperate request to get the csrf token"""
         resp = self.client.post(config.CSRF_URL)
