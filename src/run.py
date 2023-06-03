@@ -18,7 +18,7 @@ logger = logging.getLogger("main")
 
 # wait befor setting the ephemeral ports
 DAYS: int = 6
-TIME: str = "2:00"
+TIME: str = "02:00"
 
 
 @catch_exceptions(cancel_on_failure=False)
