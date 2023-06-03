@@ -54,13 +54,14 @@ def main() -> None:
 
     if config.QBIT_PRIVATE_TRACKER:
         qbit.setup_private_tracker()
+    logger.info("Port setup completed..")
 
 
 if __name__ == "__main__":
-    logger.info(f"Schedule is setup to run every {DAYS} day at {TIME}")
     schedule.every(DAYS).days.at(TIME).do(main)
     schedule.run_all()
 
+    logger.info(f"Schedule is setup to run every {DAYS} day at {TIME}")
     while True:
         schedule.run_pending()
         time.sleep(1)
