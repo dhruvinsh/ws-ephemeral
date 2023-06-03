@@ -58,7 +58,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     logger.info(f"Schedule is setup to run every {DAYS} day at {TIME}")
-    schedule.every(DAYS).day.at(TIME).do(main)
+    schedule.every(DAYS).days.at(TIME).do(main)
 
     while True:
         schedule.run_pending()
