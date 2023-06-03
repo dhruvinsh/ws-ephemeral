@@ -4,12 +4,12 @@ Module that run the setup for windscrib's ephemeral port
 import logging
 import time
 
-from tqdm import trange
+import schedule
 
 import config
 from lib.qbit import QbitManager
 from logger import setup_logging
-from util import to_seconds
+from util import catch_exceptions
 from ws import Windscribe
 
 setup_logging()
@@ -17,9 +17,11 @@ setup_logging()
 logger = logging.getLogger("main")
 
 # wait befor setting the ephemeral ports
-DAYS: int = 7
+DAYS: int = 6
+TIME: str = "2:00"
 
 
+@catch_exceptions(cancel_on_failure=False)
 def main() -> None:
     """Main function responsible for setting up ws and qbit.
 
@@ -28,6 +30,7 @@ def main() -> None:
     - setup new matching ports
     - setup qbit
     """
+    logger.info("Running automation...")
     with Windscribe(username=config.WS_USERNAME, password=config.WS_PASSWORD) as ws:
         port = ws.setup()
 
@@ -45,7 +48,7 @@ def main() -> None:
             password=config.QBIT_PASSWORD,
         )
     except Exception:
-        logger.error("cannot able to work with qbit")
+        logger.error("not able to work with qbit")
         raise
     qbit.set_listen_port(port)
 
@@ -53,10 +56,10 @@ def main() -> None:
         qbit.setup_private_tracker()
 
 
-while True:
-    logger.info("setting the ephemeral port")
-    main()
+if __name__ == "__main__":
+    logger.info(f"Schedule is setup to run every {DAYS} day at {TIME}")
+    schedule.every(DAYS).day.at(TIME).do(main)
 
-    logger.info("going to wait patiently for %s days befor next reset", DAYS)
-    for _ in trange(to_seconds(DAYS), desc="Waiting for next rest:"):
+    while True:
+        schedule.run_pending()
         time.sleep(1)
