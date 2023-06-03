@@ -6,14 +6,14 @@ This project aims to automate setting up ephemeral port on windscribe VPN servic
 
 **NOTE**: updating to latest version will not break existing system but it is not advice to use it any longer. Proper environment values (see below) need to be set for qbit.
 
-
 **V1 setup (NOT ADVISED TO USE ANYMORE)**
+
 ```bash
 docker run -e WS_USERNAME=username -e WS_PASSWORD=password -e dhruvinsh/ws-ephemeral:latest
 ```
 
-
 **V2 setup**
+
 ```bash
 docker run \
 -e WS_USERNAME=username \
@@ -27,6 +27,7 @@ dhruvinsh/ws-ephemeral:latest
 ```
 
 Docker compose file is provided for example, make some adjustment and run as,
+
 ```bash
 docker compose up -d
 ```
@@ -36,7 +37,7 @@ docker compose up -d
 Available tags for docker image:
 
 | Tag    | Container Type                                                                     |
-|--------|------------------------------------------------------------------------------------|
+| ------ | ---------------------------------------------------------------------------------- |
 | latest | most recent changes straight from main branch                                      |
 | 2.x.x  | Specific build from v2 with qbit and matching port support                         |
 | 1.x.x  | Specific build from v1 with no qbit or matching port support (in maintenance mode) |
@@ -45,7 +46,7 @@ Available tags for docker image:
 ### Environment Variables
 
 | Variable             | Comment                                                                          | Applicable Version |
-|----------------------|----------------------------------------------------------------------------------|--------------------|
+| -------------------- | -------------------------------------------------------------------------------- | ------------------ |
 | WS_USERNAME          | WS username                                                                      | v1.x.x and v2.x.x  |
 | WS_PASSWORD          | WS password                                                                      | v1.x.x and v2.x.x  |
 | QBIT_USERNAME        | QBIT username                                                                    | v2.x.x             |
@@ -60,7 +61,21 @@ Unraid template is now available under community application.
 
 ## Changelog
 
+v2.1.0 - 3rd Jun 2023
+
+- a54aa1f code: logging sequence changed
+- 2461df3 code: fire job at the beginning and then wait for schedule
+- 6e64769 fix: time format for schedule was incorrect
+- f1d8d89 fix: incorrect method for schedule
+- 579fbf8 lib: migrating to schedule library
+- 071fde8 env: schedule package added
+- ff84105 code: converting WS to context manager
+- e16bcc6 env: updating packages to latest version
+- ab5086b updating pyproject metadata
+- 4548209 packages: bump to latest version
+
 v2.0.0 - 9th April 2023
+
 - 8493fe1 (HEAD -> main) README updated
 - 64f68a7 docker: update to setup
 - a3f6c51 docker-compose example added
@@ -74,7 +89,6 @@ v2.0.0 - 9th April 2023
 - 33bafaa package(s): semver added
 - 43e478e README: fixing another mess
 - fe81416 README: fixing changelog
-
 
 v1.2.0 - 7th April 2023
 
@@ -95,7 +109,6 @@ Better progress bar added with better way of logging message on the console. Als
 - d0e7ede env: updating poetry lock
 - 84641c5 packages: adding qbit api
 - 5733d1b packages: bump to latest version
-
 
 ## Privacy
 
