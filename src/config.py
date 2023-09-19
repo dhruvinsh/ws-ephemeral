@@ -56,3 +56,11 @@ if QBIT_USERNAME == "default123!!" or QBIT_PASSWORD == "default123!!":
 
 _QBIT_PRIVATE_TRACKER: str = os.getenv("QBIT_PRIVATE_TRACKER", "false")
 QBIT_PRIVATE_TRACKER: bool = True if _QBIT_PRIVATE_TRACKER.lower() == "true" else False
+
+
+# wait befor setting the ephemeral ports
+try:
+    DAYS: int = int(os.getenv("DAYS", 6))
+except TypeError:
+    print("DAYS must be integer")
+TIME: str = os.getenv("TIME", "02:00")

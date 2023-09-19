@@ -16,10 +16,6 @@ setup_logging()
 
 logger = logging.getLogger("main")
 
-# wait befor setting the ephemeral ports
-DAYS: int = 6
-TIME: str = "02:00"
-
 
 @catch_exceptions(cancel_on_failure=False)
 def main() -> None:
@@ -58,10 +54,10 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    schedule.every(DAYS).days.at(TIME).do(main)
+    schedule.every(config.DAYS).days.at(config.TIME).do(main)
     schedule.run_all()
 
-    logger.info(f"Schedule is setup to run every {DAYS} day at {TIME}")
+    logger.info(f"Schedule is setup to run every {config.DAYS} day at {config.TIME}")
     while True:
         schedule.run_pending()
         time.sleep(1)
