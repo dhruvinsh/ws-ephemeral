@@ -61,6 +61,14 @@ Unraid template is now available under community application.
 
 ## Changelog
 
+v2.2.0 - 19th Sept 2023
+
+- af47114 heatbeat check added
+- 708cba5 config: extracting some variable
+- 5c315dd logging: space before the messages
+- 822d316 env: all the dependency updated to latest version
+- 3999224 pre-commit-config updated to latest version
+
 v2.1.0 - 3rd Jun 2023
 
 - a54aa1f code: logging sequence changed
