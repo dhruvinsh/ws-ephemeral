@@ -7,6 +7,11 @@ from pathlib import Path
 
 import httpx
 
+# only run once
+# allows wg-ephemeral to be used as a cronjob
+_ONESHOT: str = os.getenv("ONESHOT", "false")
+ONESHOT: bool = True if _ONESHOT.lower() == "true" else False
+
 BASE_PATH: Path = Path(".")
 
 # common config
@@ -40,7 +45,7 @@ COOKIES.set("ref", "https://windscribe.com/")
 
 
 # fmt: off
-# some qbitconfig
+# some qbit config
 QBIT_USERNAME: str = os.getenv("QBIT_USERNAME", "default123!!")
 QBIT_PASSWORD: str = os.getenv("QBIT_PASSWORD", "default123!!")
 QBIT_HOST: str     = os.getenv("QBIT_HOST", "127.0.0.1")
@@ -58,7 +63,7 @@ _QBIT_PRIVATE_TRACKER: str = os.getenv("QBIT_PRIVATE_TRACKER", "false")
 QBIT_PRIVATE_TRACKER: bool = True if _QBIT_PRIVATE_TRACKER.lower() == "true" else False
 
 
-# wait befor setting the ephemeral ports
+# wait before setting the ephemeral ports
 try:
     DAYS: int = int(os.getenv("DAYS", 6))
 except TypeError:
