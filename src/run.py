@@ -9,6 +9,7 @@ import schedule
 import config
 from lib.qbit import QbitManager
 from logger import setup_logging
+from monitor import HEARTBEAT, monitor
 from util import catch_exceptions
 from ws import Windscribe
 
@@ -22,10 +23,20 @@ def main() -> None:
     """Main function responsible for setting up ws and qbit.
 
     Steps:
+    - check if the hearbeat was okay
     - login to ws
     - setup new matching ports
     - setup qbit
     """
+    if not HEARTBEAT:
+        msg = (
+            "From hearbeat check, "
+            "qBitTorrent wasn't accesible. "
+            "Can't run ephemeral renewal right now."
+        )
+        logger.error(msg)
+        return
+
     logger.info("Running automation...")
     with Windscribe(username=config.WS_USERNAME, password=config.WS_PASSWORD) as ws:
         port = ws.setup()
@@ -55,6 +66,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     schedule.every(config.DAYS).days.at(config.TIME).do(main)
+    schedule.every(5).minutes.do(monitor)
     schedule.run_all()
 
     logger.info(f"Schedule is setup to run every {config.DAYS} day at {config.TIME}")
