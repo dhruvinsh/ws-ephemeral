@@ -69,7 +69,8 @@ if __name__ == "__main__":
     schedule.every(5).minutes.do(monitor)
     schedule.run_all()
 
-    logger.info(f"Schedule is setup to run every {config.DAYS} day at {config.TIME}")
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    if not config.ONESHOT:
+        logger.info(f"Schedule is setup to run every {config.DAYS} day at {config.TIME}")
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
