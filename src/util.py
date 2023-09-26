@@ -17,7 +17,7 @@ def catch_exceptions(cancel_on_failure=False):
         def wrapper(*args, **kwargs):
             try:
                 return job_func(*args, **kwargs)
-            except:
+            except Exception:
                 import traceback
 
                 logging.error(traceback.format_exc())
