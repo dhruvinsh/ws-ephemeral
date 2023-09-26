@@ -67,6 +67,14 @@ Unraid template is now available under community application.
 
 ## Changelog
 
+v2.3.0 - 26th Sept 2023
+
+- 4f6e089 (HEAD -> main) README updated
+- cfd382a gitignore update
+- 217789f code: black formatting
+- f66b6e9 util: adding Exception rather plain `except`
+- a19adc5 (origin/main, origin/HEAD) ONESHOT, REQUEST_TIMEOUT and Efficient docker build (#7)
+
 v2.2.0 - 19th Sept 2023
 
 - af47114 heatbeat check added
