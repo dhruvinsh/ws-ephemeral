@@ -19,10 +19,12 @@ docker run \
 -e WS_USERNAME=username \
 -e WS_PASSWORD=password \
 -e QBIT_USERNAME=username \
--e QBIT_PASSWORD=password  \
+-e QBIT_PASSWORD=password \
 -e QBIT_HOST=http://192.168.1.10 \
 -e QBIT_PORT=8080 \
 -e QBIT_PRIVATE_TRACKER=true \
+-e ONESHOT=false \
+-e REQUEST_TIMEOUT=10 \
 dhruvinsh/ws-ephemeral:latest
 ```
 
@@ -54,6 +56,10 @@ Available tags for docker image:
 | QBIT_HOST            | QBIT web address like, https://qbit.xyz.com or http://192.168.1.10               | v2.x.x             |
 | QBIT_PORT            | QBIT web port number like, 443 or 8080                                           | v2.x.x             |
 | QBIT_PRIVATE_TRACKER | get QBIT ready for private tracker by disabling dht, pex and lsd (true or false) | v2.x.x             |
+| ONESHOT              | Run and setup the code only one time so that job can be schedule externally      | v2.x.x             |
+| REQUEST_TIMEOUT      | configurable http api timeout for slow network/busy websites                     | v2.x.x             |
+
+> NOTE: for usage see [Docker Setup](#docker-setup) v2 setup guide.
 
 ## Unraid Setup
 
