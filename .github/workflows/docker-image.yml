@@ -20,6 +20,7 @@ jobs:
           images: |
             ${{ secrets.DOCKERHUB_USERNAME }}/ws-ephemeral
           tags: |
+            type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}
 
