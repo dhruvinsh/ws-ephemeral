@@ -15,6 +15,8 @@ import httpx
 
 import config
 
+from .cookie import default_cookie, load_cookie, save_cookie
+
 
 class Csrf(TypedDict):
     """CSRF type dict"""
@@ -38,8 +40,15 @@ class Windscribe:
             # ruff: noqa: E501
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
         }
+
+        self.cookie_found = True
+        cookie = load_cookie()
+        if cookie is None:
+            self.cookie_found = False
+            cookie = default_cookie()
+
         self.client = httpx.Client(
-            headers=headers, cookies=config.COOKIES, timeout=config.REQUEST_TIMEOUT
+            headers=headers, cookies=cookie, timeout=config.REQUEST_TIMEOUT
         )
 
         # we will populate this later in the login call
@@ -93,6 +102,10 @@ class Windscribe:
             "code": "",
         }
         self.client.post(config.LOGIN_URL, data=data)
+
+        # save the cookie for the future use.
+        save_cookie(self.client.cookies)
+
         self.logger.debug("login successful")
 
     def _delete_ephm_port(self) -> dict[str, Union[bool, int]]:
@@ -137,7 +150,8 @@ class Windscribe:
 
     def setup(self) -> int:
         """perform ephemeral port setup here"""
-        self._login()
+        if not self.cookie_found:
+            self._login()
 
         # after login we need to update the csrf token agian,
         # windscribe puts new csrf token in the javascript

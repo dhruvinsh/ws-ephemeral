@@ -44,10 +44,7 @@ if not all([WS_USERNAME, WS_PASSWORD]):
 USERNAME_ID: str = "username"
 PASSWORD_ID: str = "password"
 
-COOKIES = httpx.Cookies()
-COOKIES.set("i_can_has_cookie", "1")
-COOKIES.set("ref", "https://windscribe.com/")
-
+COOKIE_PATH = Path("cookie.pkl")
 
 # fmt: off
 # some qbit config
