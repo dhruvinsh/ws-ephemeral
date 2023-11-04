@@ -29,8 +29,8 @@ def monitor() -> bool:
     except Exception:
         logging.error("Something wrong with Qbit, it's not accessible")
         HEARTBEAT = False
-
-    logging.debug("Hearbeat detected")
-    HEARTBEAT = True
+    else:
+        logging.debug("Hearbeat detected")
+        HEARTBEAT = True
 
     return HEARTBEAT
