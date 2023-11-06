@@ -1,6 +1,26 @@
 ## Changelog
 
-v2.3.0 - 26th Sept 2023
+v3.0.0 - 5th Nov 2023
+
+- 528fa4a lib: correcting warning message
+- 3ecd568 Merge pull request #10 from dhruvinsh/dev
+- 33c08c1 docs(ws): updating README and other relevant docs
+- 88c7f60 env: removing beautifulsoup4
+- 5e83da6 chore(code): proper type hint
+- 2288f54 windscribe: more cleaner api to work with cookie
+- 90d224e gitignore updated
+- 94a2a44 env: updating dependency along with poetry
+- c343585 WIP: lib(ws): adding cookie storage support
+- baec121 fix(monitor): fix heartbeat logic
+- af8e1ce doc: splitting CHANGELOG and README
+- 6f64474 env: env updated
+- 1d5606b env updated
+- 2733588 ci: even branch added so that dispatch can work
+- 4045126 ci: minor tweak to build context
+- 2a2ebb3 ci: adding docker building
+- 0a6409c README change log updated
+
+v2.3.0 - 26th Sep 2023
 
 - 4f6e089 (HEAD -> main) README updated
 - cfd382a gitignore update
@@ -8,7 +28,7 @@ v2.3.0 - 26th Sept 2023
 - f66b6e9 util: adding Exception rather plain `except`
 - a19adc5 (origin/main, origin/HEAD) ONESHOT, REQUEST_TIMEOUT and Efficient docker build (#7)
 
-v2.2.0 - 19th Sept 2023
+v2.2.0 - 19th Sep 2023
 
 - af47114 heatbeat check added
 - 708cba5 config: extracting some variable
@@ -29,7 +49,7 @@ v2.1.0 - 3rd Jun 2023
 - ab5086b updating pyproject metadata
 - 4548209 packages: bump to latest version
 
-v2.0.0 - 9th April 2023
+v2.0.0 - 9th Apr 2023
 
 - 8493fe1 (HEAD -> main) README updated
 - 64f68a7 docker: update to setup
@@ -45,7 +65,7 @@ v2.0.0 - 9th April 2023
 - 43e478e README: fixing another mess
 - fe81416 README: fixing changelog
 
-v1.2.0 - 7th April 2023
+v1.2.0 - 7th Apr 2023
 
 Better progress bar added with better way of logging message on the console. Also preparing system for the next v2.0.0 release with qbit support
 
