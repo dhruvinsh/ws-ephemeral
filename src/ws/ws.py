@@ -14,6 +14,7 @@ from typing import TypedDict, Union
 import httpx
 
 import config
+from lib.decorators import login_required
 
 from .cookie import default_cookie, load_cookie, save_cookie
 
@@ -26,9 +27,9 @@ class Csrf(TypedDict):
 
 
 class Windscribe:
-    """
-    windscribe api to enable ephemeral ports.
-    Only works with non 2FA account.
+    """Windscribe api to enable ephemeral ports.
+
+    Only works with non 2FA account (for now).
     """
 
     # pylint: disable=redefined-outer-name
@@ -36,15 +37,13 @@ class Windscribe:
         headers = {
             "origin": config.BASE_URL,
             "referer": config.LOGIN_URL,
-            # pylint: disable=line-too-long
-            # ruff: noqa: E501
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",  # ruff: noqa: E501
         }
 
-        self.cookie_found = True
+        self.is_authenticated = True
         cookie = load_cookie()
         if cookie is None:
-            self.cookie_found = False
+            self.is_authenticated = False
             cookie = default_cookie()
 
         self.client = httpx.Client(
@@ -52,7 +51,7 @@ class Windscribe:
         )
 
         # we will populate this later in the login call
-        self.csrf: Csrf = self._get_csrf()
+        self.csrf: Csrf = self.get_csrf()
         self.username = username
         self.password = password
 
@@ -66,12 +65,23 @@ class Windscribe:
         """close httpx session"""
         self.close()
 
-    def _get_csrf(self) -> Csrf:
+    @property
+    def is_authenticated(self) -> bool:
+        """If session is authenticated."""
+        return self._is_authenticated
+
+    @is_authenticated.setter
+    def is_authenticated(self, value: bool) -> None:
+        """Set authentication status."""
+        self._is_authenticated = value
+
+    def get_csrf(self) -> Csrf:
         """windscribe make seperate request to get the csrf token"""
         resp = self.client.post(config.CSRF_URL)
         return resp.json()
 
-    def _renew_csrf(self) -> Csrf:
+    @login_required
+    def renew_csrf(self) -> Csrf:
         """after login windscribe issue new csrf token withing javascript"""
         resp = self.client.get(config.MYACT_URL)
         csrf_time = re.search(r"csrf_time = (?P<ctime>\d+)", resp.text)
@@ -90,8 +100,8 @@ class Windscribe:
         self.logger.debug("csrf renewed successfully.")
         return new_csrf
 
-    def _login(self) -> None:
-        """login in to the webpage"""
+    def login(self) -> None:
+        """login in to the webpage."""
         data = {
             "login": 1,
             "upgrade": 0,
@@ -106,9 +116,11 @@ class Windscribe:
         # save the cookie for the future use.
         save_cookie(self.client.cookies)
 
+        self.is_authenticated = True
         self.logger.debug("login successful")
 
-    def _delete_ephm_port(self) -> dict[str, Union[bool, int]]:
+    @login_required
+    def delete_ephm_port(self) -> dict[str, Union[bool, int]]:
         """
         ensure we delete the ephemeral port setting if any available
         """
@@ -122,7 +134,8 @@ class Windscribe:
 
         return res
 
-    def _set_matching_port(self) -> int:
+    @login_required
+    def set_matching_port(self) -> int:
         """
         setup matching ephemeral port on WS
         """
@@ -150,15 +163,12 @@ class Windscribe:
 
     def setup(self) -> int:
         """perform ephemeral port setup here"""
-        if not self.cookie_found:
-            self._login()
-
         # after login we need to update the csrf token agian,
         # windscribe puts new csrf token in the javascript
-        self.csrf = self._renew_csrf()
+        self.csrf = self.renew_csrf()
 
-        self._delete_ephm_port()
-        return self._set_matching_port()
+        self.delete_ephm_port()
+        return self.set_matching_port()
 
     def close(self) -> None:
         """close httpx session"""

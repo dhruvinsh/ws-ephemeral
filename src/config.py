@@ -5,8 +5,6 @@ import os
 import sys
 from pathlib import Path
 
-import httpx
-
 # only run once
 # allows wg-ephemeral to be used as a cronjob
 _ONESHOT: str = os.getenv("ONESHOT", "false")
@@ -34,6 +32,7 @@ SET_EPHEM_URL: str = STATICIP + "postEphPort"
 # WS config
 WS_USERNAME: str = os.getenv("WS_USERNAME", "")
 WS_PASSWORD: str = os.getenv("WS_PASSWORD", "")
+WS_COOKIE = Path(os.getenv("WS_COOKIE_PATH", ".")) / "cookie.pkl"
 
 if not all([WS_USERNAME, WS_PASSWORD]):
     print("ENV: WS_USERNAME and WS_PASSWORD need to be set")
@@ -44,7 +43,6 @@ if not all([WS_USERNAME, WS_PASSWORD]):
 USERNAME_ID: str = "username"
 PASSWORD_ID: str = "password"
 
-COOKIE_PATH = Path("cookie.pkl")
 
 # fmt: off
 # some qbit config
