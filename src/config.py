@@ -13,7 +13,7 @@ ONESHOT: bool = True if _ONESHOT.lower() == "true" else False
 # https://www.python-httpx.org/advanced/#timeout-configuration
 _REQUEST_TIMEOUT: int = int(os.getenv("REQUEST_TIMEOUT", "5"))
 # timeouts are disabled if None is used
-REQUEST_TIMEOUT: int = None if _REQUEST_TIMEOUT == -1 else _REQUEST_TIMEOUT
+REQUEST_TIMEOUT: int | None = None if _REQUEST_TIMEOUT == -1 else _REQUEST_TIMEOUT
 
 BASE_PATH: Path = Path(".")
 
