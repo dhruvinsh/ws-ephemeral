@@ -13,7 +13,7 @@ def login_required(func: Callable):
 
         # if any requests made and not authenticated then login first.
         if not obj.is_authenticated:
-            logging.warning("rquests is authenticated, sending one.")
+            logging.warning("rquests is not authenticated, sending one.")
             obj.login()
 
         return func(*args, **kwargs)
