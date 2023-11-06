@@ -5,8 +5,6 @@ import os
 import sys
 from pathlib import Path
 
-import httpx
-
 # only run once
 # allows wg-ephemeral to be used as a cronjob
 _ONESHOT: str = os.getenv("ONESHOT", "false")
@@ -15,7 +13,7 @@ ONESHOT: bool = True if _ONESHOT.lower() == "true" else False
 # https://www.python-httpx.org/advanced/#timeout-configuration
 _REQUEST_TIMEOUT: int = int(os.getenv("REQUEST_TIMEOUT", "5"))
 # timeouts are disabled if None is used
-REQUEST_TIMEOUT: int = None if _REQUEST_TIMEOUT == -1 else _REQUEST_TIMEOUT
+REQUEST_TIMEOUT: int | None = None if _REQUEST_TIMEOUT == -1 else _REQUEST_TIMEOUT
 
 BASE_PATH: Path = Path(".")
 
@@ -34,6 +32,7 @@ SET_EPHEM_URL: str = STATICIP + "postEphPort"
 # WS config
 WS_USERNAME: str = os.getenv("WS_USERNAME", "")
 WS_PASSWORD: str = os.getenv("WS_PASSWORD", "")
+WS_COOKIE = Path(os.getenv("WS_COOKIE_PATH", ".")) / "cookie.pkl"
 
 if not all([WS_USERNAME, WS_PASSWORD]):
     print("ENV: WS_USERNAME and WS_PASSWORD need to be set")
@@ -43,10 +42,6 @@ if not all([WS_USERNAME, WS_PASSWORD]):
 # TODO: expose via config file
 USERNAME_ID: str = "username"
 PASSWORD_ID: str = "password"
-
-COOKIES = httpx.Cookies()
-COOKIES.set("i_can_has_cookie", "1")
-COOKIES.set("ref", "https://windscribe.com/")
 
 
 # fmt: off

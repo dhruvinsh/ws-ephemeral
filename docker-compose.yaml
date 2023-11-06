@@ -1,8 +1,10 @@
 version: "3.8"
 
-service:
+services:
   ws-ephemeral:
     container_name: ws-ephemeral
     image: dhruvinsh/ws-ephemeral:latest
     env_file: .env.example
     restart: unless-stopped
+    volumes:
+      - /home/user/appdata:/cookie

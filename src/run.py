@@ -70,7 +70,9 @@ if __name__ == "__main__":
     schedule.run_all()
 
     if not config.ONESHOT:
-        logger.info(f"Schedule is setup to run every {config.DAYS} day at {config.TIME}")
+        logger.info(
+            f"Schedule is setup to run every {config.DAYS} day at {config.TIME}"
+        )
         while True:
             schedule.run_pending()
             time.sleep(1)
