@@ -496,13 +496,13 @@ files = [
 
 [[package]]
 name = "qbittorrent-api"
-version = "2023.10.54"
+version = "2023.11.55"
 description = "Python client for qBittorrent v4.1+ Web API."
 optional = false
-python-versions = "*"
+python-versions = ">=3.8"
 files = [
-    {file = "qbittorrent-api-2023.10.54.tar.gz", hash = "sha256:c421c1fe93d445cd7ebe37ba22104767a1e8814b2661f044f7defb42dc28736c"},
-    {file = "qbittorrent_api-2023.10.54-py2.py3-none-any.whl", hash = "sha256:e26153da0978b51e03210ee036732bf8379817398a290516dd11e8a5824cd91b"},
+    {file = "qbittorrent-api-2023.11.55.tar.gz", hash = "sha256:c4f7c2ec7f234280b079dec5b03f6aba4e19f92b2e1b186d0dfa2380ebbf1c70"},
+    {file = "qbittorrent_api-2023.11.55-py3-none-any.whl", hash = "sha256:fa64ad8f99505b623f386e2836f91fbb5f27238010ab991fc6fd49837e45a39b"},
 ]
 
 [package.dependencies]
@@ -511,7 +511,7 @@ requests = ">=2.16.0"
 urllib3 = ">=1.24.2"
 
 [package.extras]
-dev = ["black (==23.10.0)", "build (==1.0.3)", "coverage[toml] (==7.3.2)", "furo (==2023.9.10)", "mypy (==1.6.1)", "pre-commit (==3.5.0)", "pytest (==7.4.2)", "sphinx (==7.2.6)", "sphinx-autodoc-typehints (==1.24.0)", "sphinx-copybutton (==0.5.2)", "sphinxcontrib-spelling (==8.0.0)", "tox (==4.11.3)", "twine (==4.0.2)", "types-requests (==2.31.0.10)", "types-six (==1.16.21.9)"]
+dev = ["black (==23.10.1)", "build (==1.0.3)", "coverage[toml] (==7.3.2)", "furo (==2023.9.10)", "mypy (==1.6.1)", "pre-commit (==3.5.0)", "pytest (==7.4.3)", "sphinx (==7.2.6)", "sphinx-autodoc-typehints (==1.24.1)", "sphinx-copybutton (==0.5.2)", "sphinxcontrib-spelling (==8.0.0)", "tox (==4.11.3)", "twine (==4.0.2)", "types-requests (==2.31.0.10)", "types-six (==1.16.21.9)"]
 
 [[package]]
 name = "requests"
