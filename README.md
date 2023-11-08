@@ -15,7 +15,7 @@ Windscribe VPN and need to open the ports.
 There are two registries available:
 
 - dhruvinsh/ws-ephemeral
-- ghcr.io/dhruvinsh/ws-ephemera
+- ghcr.io/dhruvinsh/ws-ephemeral
 
 ### Tags
 
