@@ -12,18 +12,18 @@ Windscribe VPN and need to open the ports.
 
 ```bash
 docker run \
--e WS_USERNAME=username \
--e WS_PASSWORD=password \
--e WS_DEBUG=False \
--e WS_COOKIE_PATH=/cookie
--e QBIT_USERNAME=username \
--e QBIT_PASSWORD=password \
+-e ONESHOT=false \
 -e QBIT_HOST=http://192.168.1.10 \
+-e QBIT_PASSWORD=password \
 -e QBIT_PORT=8080 \
 -e QBIT_PRIVATE_TRACKER=true \
--e ONESHOT=false \
+-e QBIT_USERNAME=username \
 -e REQUEST_TIMEOUT=10 \
--v /home/user/appdata/:/cookie
+-e WS_COOKIE_PATH=/cookie \
+-e WS_DEBUG=False \
+-e WS_PASSWORD=password \
+-e WS_USERNAME=username \
+-v /home/user/appdata/:/cookie \
 dhruvinsh/ws-ephemeral:latest
 ```
 
