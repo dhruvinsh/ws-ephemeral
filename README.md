@@ -10,6 +10,28 @@ Windscribe VPN and need to open the ports.
 
 **NOTE: V1 is deprecated now and note supported.**
 
+### Registries
+
+There are two registries available:
+
+- dhruvinsh/ws-ephemeral
+- ghcr.io/dhruvinsh/ws-ephemera
+
+### Tags
+
+Available tags for docker image (based on semver):
+
+| Tag    | Container Type                                |
+| ------ | --------------------------------------------- |
+| main   | straight from `main` branch                   |
+| latest | most recent changes straight from main branch |
+| x      | specific major versoin with all patches       |
+| 3.x.x  | Specific version                              |
+
+### Deploy
+
+#### Cli
+
 ```bash
 docker run \
 -e ONESHOT=false \
@@ -27,23 +49,13 @@ docker run \
 dhruvinsh/ws-ephemeral:latest
 ```
 
+#### Docker-compose
+
 Docker compose file is provided for example, make some adjustment and run as,
 
 ```bash
 docker compose up -d
 ```
-
-### Tags
-
-Available tags for docker image:
-
-| Tag    | Container Type                                             |
-| ------ | ---------------------------------------------------------- |
-| latest | most recent changes straight from main branch              |
-| 3.x.x  | Persistent cookie support added                            |
-| 2.x.x  | Specific build from v2 with qbit and matching port support |
-| 1.x.x  | DEPRECATED                                                 |
-| x      | specific major versoin with all patches                    |
 
 ### Environment Variables
 
