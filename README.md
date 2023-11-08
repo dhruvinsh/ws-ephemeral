@@ -21,12 +21,12 @@ There are two registries available:
 
 Available tags for docker image (based on semver):
 
-| Tag    | Container Type                                |
-| ------ | --------------------------------------------- |
-| main   | straight from `main` branch                   |
-| latest | most recent changes straight from main branch |
-| x      | specific major versoin with all patches       |
-| 3.x.x  | Specific version                              |
+| Tag    | Container Type                 |
+| ------ | ------------------------------ |
+| main   | straight from `main` branch    |
+| latest | latest stable released version |
+| x      | specific major versoin         |
+| x.x.x  | specific version               |
 
 ### Deploy
 
