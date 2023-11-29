@@ -1,5 +1,17 @@
 ## Changelog
 
+v3.1.0 - 28th Nov 2023
+
+- 1c37128 env: bumping the qbittorrentapi to latest version
+- 6104d0a README: fixing registry url
+- b88799b README updated
+- 80bba0d README updated
+- 90146ff ci: build image for main branch
+- a463e67 ci: image release to ghcr.io
+- dad5340 README update
+- 9439bc2 env: updating to latest version
+- 4f7dd6c updating pre-commit-config
+
 v3.0.0 - 5th Nov 2023
 
 - 528fa4a lib: correcting warning message
