@@ -1,4 +1,9 @@
-## Changelog
+# Changelog
+
+v3.1.1 - 25th Feb 2024
+
+- a94f42a env: bump to latest version
+- e12248a doc: updating CHANGELOG
 
 v3.1.0 - 28th Nov 2023
 
