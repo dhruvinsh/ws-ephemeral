@@ -1,12 +1,12 @@
-"""
-Module that run the setup for windscrib's ephemeral port
-"""
+"""Module that run the setup for windscrib's ephemeral port."""
+
+from __future__ import annotations
+
 import logging
 import time
 
-import schedule
-
 import config
+import schedule
 from lib.qbit import QbitManager
 from logger import setup_logging
 from monitor import HEARTBEAT, monitor
@@ -19,8 +19,8 @@ logger = logging.getLogger("main")
 
 
 @catch_exceptions(cancel_on_failure=False)
-def main() -> None:
-    """Main function responsible for setting up ws and qbit.
+def main() -> dict[str, str | None | int]:
+    """Set up ws and qbit.
 
     Steps:
     - check if the hearbeat was okay
@@ -35,7 +35,7 @@ def main() -> None:
             "Can't run ephemeral renewal right now."
         )
         logger.error(msg)
-        return
+        return {"status": False, "reason": "heartbeat failure", "port": None}
 
     logger.info("Running automation...")
     with Windscribe(username=config.WS_USERNAME, password=config.WS_PASSWORD) as ws:
@@ -43,9 +43,9 @@ def main() -> None:
 
     if not config.QBIT_FOUND:
         logger.warning(
-            "Read the latest doc: https://github.com/dhruvinsh/ws-ephemeral#readme"
+            "Read the latest doc: https://github.com/dhruvinsh/ws-ephemeral#readme",
         )
-        return
+        return {"status": True, "reason": "no qbit but port updated", "port": port}
 
     try:
         qbit = QbitManager(
@@ -55,13 +55,14 @@ def main() -> None:
             password=config.QBIT_PASSWORD,
         )
     except Exception:
-        logger.error("not able to work with qbit")
+        logger.exception("not able to work with qbit")
         raise
     qbit.set_listen_port(port)
 
     if config.QBIT_PRIVATE_TRACKER:
         qbit.setup_private_tracker()
     logger.info("Port setup completed..")
+    return {"status": True, "reason": "", "port": port}
 
 
 if __name__ == "__main__":
@@ -71,7 +72,9 @@ if __name__ == "__main__":
 
     if not config.ONESHOT:
         logger.info(
-            f"Schedule is setup to run every {config.DAYS} day at {config.TIME}"
+            "Schedule is setup to run every %s day at %s",
+            config.DAYS,
+            config.TIME,
         )
         while True:
             schedule.run_pending()
