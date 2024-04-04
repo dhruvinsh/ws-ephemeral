@@ -1,30 +1,60 @@
-[tool.poetry]
+[project]
 name = "ws-ephemeral"
-version = "2.1.0"
-description = "request matching ephemeral port"
-authors = ["Dhruvin Shah <dhruvin3@gmail.com>"]
-
-[tool.poetry.dependencies]
-python = "^3.11"
-httpx = ">=0.23.0"
-qbittorrent-api = ">=2023.3.44"
-tqdm = "^4.65.0"
-pyyaml = "^6.0"
-semver = "^3.0.0"
-schedule = "^1.2.0"
-
-[tool.poetry.group.dev.dependencies]
-tqdm-stubs = ">=0.2.1"
-mypy = ">=0.971"
-black = ">=22.6.0"
-pylint = ">=2.14.5"
-isort = ">=5.10.1"
-types-pyyaml = "^6.0.12.9"
-
-[tool.pylint.basic]
-good-names = ["ws"]
-
+version = "3.1.1"
+description = "Automate ephemeral port renewal"
+authors = [{ name = "Dhruvin Shah", email = "dhruvin3@gmail.com" }]
+dependencies = [
+    "fastapi==0.110.0",
+    "httpx==0.27.0",
+    "loguru==0.7.2",
+    "pydantic==2.6.4",
+    "pyyaml==6.0.1",
+    "qbittorrent-api==2024.2.59",
+    "schedule==1.2.1",
+    "semver==3.0.2",
+    "sqlmodel==0.0.16",
+    "tqdm==4.66.2",
+    "typer[all]==0.9.0",
+    "uvicorn==0.28.1",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "mypy>=1.9.0",
+    "ruff>=0.3.3",
+    "tqdm-stubs>=0.2.1",
+    "types-pyyaml>=6.0.12.20240311",
+    "debugpy>=1.8.1",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ws_ephemeral"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+]
+extend-select = ['Q', 'RUF100', 'C90', 'UP', 'I', 'D', 'T']
+extend-ignore = ['D105', 'D107', 'D205', 'D415']
+isort = { known-first-party = ['ws_ephemeral'] }
+mccabe = { max-complexity = 14 }
+pydocstyle = { convention = 'google' }
