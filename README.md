@@ -8,7 +8,8 @@ Windscribe VPN and need to open the ports.
 
 ## Docker Setup
 
-**NOTE: V1 is deprecated now and note supported.**
+> [!important]
+> NOTE: V1 is deprecated and should not be used.
 
 ### Registries
 
@@ -25,7 +26,7 @@ Available tags for docker image (based on semver):
 | ------ | ------------------------------ |
 | main   | straight from `main` branch    |
 | latest | latest stable released version |
-| x      | specific major versoin         |
+| x      | specific major version         |
 | x.x.x  | specific version               |
 
 ### Deploy
@@ -45,7 +46,7 @@ docker run \
 -e WS_DEBUG=False \
 -e WS_PASSWORD=password \
 -e WS_USERNAME=username \
--v /home/user/appdata/:/cookie \
+-v /path/to/local/data:/cookie \
 dhruvinsh/ws-ephemeral:latest
 ```
 
@@ -73,6 +74,7 @@ docker compose up -d
 | ONESHOT              | Run and setup the code only one time so that job can be schedule externally      |
 | REQUEST_TIMEOUT      | configurable http api timeout for slow network/busy websites                     |
 
+> [!tip]
 > NOTE: for usage see [Docker Setup](#docker-setup) v2 setup guide.
 
 ## Unraid Setup
@@ -88,6 +90,17 @@ Located [here](./CHANGELOG.md)
 I assure you that nothing is being collected or logged. Your credentials are
 safe and set via environment variable only. Still If you have further questions
 or concerns, please open an issue here.
+
+## Roadmap
+
+- [] Support 2FA
+- [] Daemon mode and job mode
+  - [] Rest API (useful for cron/script job)
+  - [] Separate port renewal, qbittorrent update and private tracker logic
+  - [] Random job time for cron job #15
+- [] Allow to run custom script (for now Bash script only) #12
+- [] Support for deluge
+- [] Gluetun support [#2392](https://github.com/qdm12/gluetun/pull/2392)
 
 ## License
 
