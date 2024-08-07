@@ -1,14 +1,17 @@
+"""Decorator to protect windscribe methods."""
+
 import functools
-import logging
+from typing import TYPE_CHECKING
 
 import schedule
+from loguru import logger
 
-logger = logging.getLogger("main.util")
+if TYPE_CHECKING:
+    pass
 
 
 def catch_exceptions(cancel_on_failure=False):
-    """
-    This decorator allow to capture the error in the schedule run and provide option
+    """This decorator allow to capture the error in the schedule run and provide option
     if job cancellation require.
     """
 
@@ -18,9 +21,7 @@ def catch_exceptions(cancel_on_failure=False):
             try:
                 return job_func(*args, **kwargs)
             except Exception:
-                import traceback
-
-                logging.error(traceback.format_exc())
+                logger.exception("Error occurred.")
                 if cancel_on_failure:
                     return schedule.CancelJob
 

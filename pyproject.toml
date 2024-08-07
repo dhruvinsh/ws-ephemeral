@@ -58,3 +58,7 @@ extend-ignore = ['D105', 'D107', 'D205', 'D415']
 isort = { known-first-party = ['ws_ephemeral'] }
 mccabe = { max-complexity = 14 }
 pydocstyle = { convention = 'google' }
+
+[tool.rye.scripts]
+ws = { call = "ws_ephemeral.__main__:cli" }
+ws-monitor = { call = "ws_ephemeral.run:monitor" }

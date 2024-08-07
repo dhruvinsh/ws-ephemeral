@@ -1,8 +1,10 @@
+"""Module to work on cookie."""
+
 import pickle
 
 from httpx import Cookies
 
-import config
+from ws_ephemeral.cfg import config
 
 
 def default_cookie() -> Cookies:
@@ -33,7 +35,7 @@ def load_cookie() -> None | Cookies:
 def save_cookie(cookie: Cookies) -> None:
     """Save the cookie to the file for future use.
 
-    Read the cookie data and convert to regular dictinary object so that it can be
+    Read the cookie data and convert to regular dictionary object so that it can be
     pickled to a file.
 
     :param cookie: a cookie object from httpx requests.

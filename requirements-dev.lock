@@ -67,7 +67,7 @@ requests==2.31.0
     # via qbittorrent-api
 rich==13.7.1
     # via typer
-ruff==0.3.3
+ruff==0.3.7
 schedule==1.2.1
     # via ws-ephemeral
 semver==3.0.2
