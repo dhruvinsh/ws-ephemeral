@@ -12,6 +12,7 @@ tqdm = "^4.65.0"
 pyyaml = "^6.0"
 semver = "^3.0.0"
 schedule = "^1.2.0"
+pyotp = "^2.9.0"
 
 [tool.poetry.group.dev.dependencies]
 tqdm-stubs = ">=0.2.1"
