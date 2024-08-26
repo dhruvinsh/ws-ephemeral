@@ -46,6 +46,7 @@ docker run \
 -e WS_DEBUG=False \
 -e WS_PASSWORD=password \
 -e WS_USERNAME=username \
+-e WS_TOPT=totp_token \
 -v /path/to/local/data:/cookie \
 dhruvinsh/ws-ephemeral:latest
 ```
@@ -64,6 +65,7 @@ docker compose up -d
 | -------------------- | -------------------------------------------------------------------------------- |
 | WS_USERNAME          | WS username                                                                      |
 | WS_PASSWORD          | WS password                                                                      |
+| WS_TOTP              | WS totp token for 2fa                                                            |
 | WS_DEBUG             | Enable Debug logging                                                             |
 | WS_COOKIE_PATH       | Persistent location for the cookie. (v3.x.x only)                                |
 | QBIT_USERNAME        | QBIT username                                                                    |
@@ -93,14 +95,14 @@ or concerns, please open an issue here.
 
 ## Roadmap
 
-- [] Support 2FA
-- [] Daemon mode and job mode
-  - [] Rest API (useful for cron/script job)
-  - [] Separate port renewal, qbittorrent update and private tracker logic
-  - [] Random job time for cron job #15
-- [] Allow to run custom script (for now Bash script only) #12
-- [] Support for deluge
-- [] Gluetun support [#2392](https://github.com/qdm12/gluetun/pull/2392)
+- [x] Support 2FA, #19
+- [ ] Daemon mode and job mode
+  - [ ] Rest API (useful for cron/script job)
+  - [ ] Separate port renewal, qbittorrent update and private tracker logic
+  - [ ] Random job time for cron job #15
+- [ ] Allow to run custom script (for now Bash script only) #12
+- [ ] Support for deluge
+- [ ] Gluetun support [#2392](https://github.com/qdm12/gluetun/pull/2392)
 
 ## License
 
