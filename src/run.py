@@ -1,6 +1,7 @@
 """
 Module that run the setup for windscrib's ephemeral port
 """
+
 import logging
 import time
 
@@ -38,7 +39,9 @@ def main() -> None:
         return
 
     logger.info("Running automation...")
-    with Windscribe(username=config.WS_USERNAME, password=config.WS_PASSWORD) as ws:
+    with Windscribe(
+        username=config.WS_USERNAME, password=config.WS_PASSWORD, totp=config.WS_TOTP
+    ) as ws:
         port = ws.setup()
 
     if not config.QBIT_FOUND:

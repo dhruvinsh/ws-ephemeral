@@ -12,6 +12,7 @@ import re
 from typing import TypedDict, Union
 
 import httpx
+import pyotp
 
 import config
 from lib.decorators import login_required
@@ -33,7 +34,7 @@ class Windscribe:
     """
 
     # pylint: disable=redefined-outer-name
-    def __init__(self, username: str, password: str) -> None:
+    def __init__(self, username: str, password: str, totp: str | None = None) -> None:
         headers = {
             "origin": config.BASE_URL,
             "referer": config.LOGIN_URL,
@@ -54,6 +55,7 @@ class Windscribe:
         self.csrf: Csrf = self.get_csrf()
         self.username = username
         self.password = password
+        self.totp = totp
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -102,6 +104,11 @@ class Windscribe:
 
     def login(self) -> None:
         """login in to the webpage."""
+        # NOTE: at the given moment try to resolve totp so that we don't have any delay.
+        totp = ""
+        if self.totp is not None:
+            totp = pyotp.TOTP(self.totp).now()
+
         data = {
             "login": 1,
             "upgrade": 0,
@@ -109,9 +116,9 @@ class Windscribe:
             "csrf_token": self.csrf["csrf_token"],
             "username": self.username,
             "password": self.password,
-            "code": "",
+            "code": totp,
         }
-        self.client.post(config.LOGIN_URL, data=data)
+        _ = self.client.post(config.LOGIN_URL, data=data)
 
         # save the cookie for the future use.
         save_cookie(self.client.cookies)
