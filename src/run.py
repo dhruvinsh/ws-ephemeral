@@ -24,15 +24,15 @@ def main() -> None:
     """Main function responsible for setting up ws and qbit.
 
     Steps:
-    - check if the hearbeat was okay
+    - check if the heartbeat was okay
     - login to ws
     - setup new matching ports
     - setup qbit
     """
     if not HEARTBEAT:
         msg = (
-            "From hearbeat check, "
-            "qBitTorrent wasn't accesible. "
+            "From heartbeat check, "
+            "qBitTorrent wasn't accessible. "
             "Can't run ephemeral renewal right now."
         )
         logger.error(msg)
