@@ -9,7 +9,7 @@ Windscribe module allow to setup the ephemeral port
 
 import logging
 import re
-from typing import TypedDict, Union
+from typing import TypedDict
 
 import httpx
 import pyotp
@@ -127,7 +127,7 @@ class Windscribe:
         self.logger.debug("login successful")
 
     @login_required
-    def delete_ephm_port(self) -> dict[str, Union[bool, int]]:
+    def delete_ephm_port(self) -> dict[str, bool | int]:
         """
         ensure we delete the ephemeral port setting if any available
         """
