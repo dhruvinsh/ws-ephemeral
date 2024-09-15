@@ -44,7 +44,7 @@ def main() -> None:
     ) as ws:
         port = ws.setup()
 
-    if not config.QBIT_FOUND:
+    if not config.qbit_found:
         logger.warning(
             "Read the latest doc: https://github.com/dhruvinsh/ws-ephemeral#readme"
         )
