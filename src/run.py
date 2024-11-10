@@ -4,6 +4,7 @@ Module that run the setup for windscrib's ephemeral port
 
 import logging
 import time
+import datetime
 
 import schedule
 
@@ -24,20 +25,22 @@ def main() -> None:
     """Main function responsible for setting up ws and qbit.
 
     Steps:
+    - check if the port is still valid
+    - login to ws (if needed)
+    - setup new matching ports (if needed)
     - check if the hearbeat was okay
-    - login to ws
-    - setup new matching ports
     - setup qbit
     """
     try:
         port_manager = PortManager.deserialize_from_env(config.WS_ENVFILE)
-        if not port_manager.is_expired():
-            logger.debug("Port is still valid, skipping update...")
+        if port_manager and not port_manager.is_expired():
+            expiration_time = port_manager.expiration_time.strftime('%Y-%m-%d %H:%M:%S')
+            logger.debug("Port %d is still valid until %s, skipping update...", port_manager.port, expiration_time)
             return
         else:
             logger.info("Port expired (or about to expire), reallocating a new port...")
     except Exception as e:
-        logger.warning(f"PortManager deserialization failed or port expired: {e}")
+        logger.warning(f"PortManager deserialization failed: {e}")
         logger.info("Reallocating a new port...")
 
     logger.info("Running automation...")

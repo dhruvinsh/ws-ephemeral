@@ -14,6 +14,8 @@ from typing import TypedDict, Union
 import httpx
 import pyotp
 
+import datetime
+
 import config
 from lib.decorators import login_required
 
@@ -166,6 +168,12 @@ class Windscribe:
         
         if external != internal:
             raise ValueError("Port setup done but matching port not found.")
+
+        # Log the new port reservation at info level
+        start_time = datetime.datetime.fromtimestamp(start_ts).strftime('%Y-%m-%d %H:%M:%S')
+        expiration_time = (datetime.datetime.fromtimestamp(start_ts) + datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
+        self.logger.info("New port reserved: %d, Start time: %s, Expiration time: %s", internal, start_time, expiration_time)
+
 
         return PortManager(internal, start_ts)
 
