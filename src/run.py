@@ -4,6 +4,7 @@ Module that run the setup for windscrib's ephemeral port
 
 import logging
 import time
+import datetime
 
 import schedule
 
@@ -12,7 +13,7 @@ from lib.qbit import QbitManager
 from logger import setup_logging
 from monitor import HEARTBEAT, monitor
 from util import catch_exceptions
-from ws import Windscribe
+from ws import Windscribe, PortManager
 
 setup_logging()
 
@@ -24,11 +25,31 @@ def main() -> None:
     """Main function responsible for setting up ws and qbit.
 
     Steps:
+    - check if the port is still valid
+    - login to ws (if needed)
+    - setup new matching ports (if needed)
     - check if the hearbeat was okay
-    - login to ws
-    - setup new matching ports
     - setup qbit
     """
+    try:
+        port_manager = PortManager.deserialize_from_env(config.WS_ENVFILE)
+        if port_manager and not port_manager.is_expired():
+            expiration_time = port_manager.expiration_time.strftime('%Y-%m-%d %H:%M:%S')
+            logger.debug("Port %d is still valid until %s, skipping update...", port_manager.port, expiration_time)
+            return
+        else:
+            logger.info("Port expired (or about to expire), reallocating a new port...")
+    except Exception as e:
+        logger.warning(f"PortManager deserialization failed: {e}")
+        logger.info("Reallocating a new port...")
+
+    logger.info("Running automation...")
+    with Windscribe(
+        username=config.WS_USERNAME, password=config.WS_PASSWORD, totp=config.WS_TOTP
+    ) as ws:
+        port_manager = ws.setup()
+        port_manager.serialize_to_env(config.WS_ENVFILE)
+
     if not HEARTBEAT:
         msg = (
             "From hearbeat check, "
@@ -37,12 +58,6 @@ def main() -> None:
         )
         logger.error(msg)
         return
-
-    logger.info("Running automation...")
-    with Windscribe(
-        username=config.WS_USERNAME, password=config.WS_PASSWORD, totp=config.WS_TOTP
-    ) as ws:
-        port = ws.setup()
 
     if not config.QBIT_FOUND:
         logger.warning(
@@ -60,7 +75,7 @@ def main() -> None:
     except Exception:
         logger.error("not able to work with qbit")
         raise
-    qbit.set_listen_port(port)
+    qbit.set_listen_port(port_manager.get_port())
 
     if config.QBIT_PRIVATE_TRACKER:
         qbit.setup_private_tracker()
@@ -68,7 +83,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    schedule.every(config.DAYS).days.at(config.TIME).do(main)
+    schedule.every(5).minutes.do(main)
     schedule.every(5).minutes.do(monitor)
     schedule.run_all()
 

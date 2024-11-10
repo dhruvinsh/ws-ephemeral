@@ -14,11 +14,13 @@ from typing import TypedDict, Union
 import httpx
 import pyotp
 
+import datetime
+
 import config
 from lib.decorators import login_required
 
 from .cookie import default_cookie, load_cookie, save_cookie
-
+from .portmanager import PortManager
 
 class Csrf(TypedDict):
     """CSRF type dict"""
@@ -142,7 +144,7 @@ class Windscribe:
         return res
 
     @login_required
-    def set_matching_port(self) -> int:
+    def set_matching_port(self) -> PortManager:
         """
         setup matching ephemeral port on WS
         """
@@ -162,13 +164,20 @@ class Windscribe:
         # lets make sure we actually had matching port
         external: int = res["epf"]["ext"]
         internal: int = res["epf"]["int"]
-
+        start_ts: int = res["epf"]["start_ts"]
+        
         if external != internal:
             raise ValueError("Port setup done but matching port not found.")
 
-        return internal
+        # Log the new port reservation at info level
+        start_time = datetime.datetime.fromtimestamp(start_ts).strftime('%Y-%m-%d %H:%M:%S')
+        expiration_time = (datetime.datetime.fromtimestamp(start_ts) + datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
+        self.logger.info("New port reserved: %d, Start time: %s, Expiration time: %s", internal, start_time, expiration_time)
 
-    def setup(self) -> int:
+
+        return PortManager(internal, start_ts)
+
+    def setup(self) -> PortManager:
         """perform ephemeral port setup here"""
         # after login we need to update the csrf token agian,
         # windscribe puts new csrf token in the javascript

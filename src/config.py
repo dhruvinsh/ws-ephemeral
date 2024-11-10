@@ -35,6 +35,7 @@ WS_USERNAME: str = os.getenv("WS_USERNAME", "")
 WS_PASSWORD: str = os.getenv("WS_PASSWORD", "")
 WS_TOTP: str | None = os.getenv("WS_TOTP", None)
 WS_COOKIE = Path(os.getenv("WS_COOKIE_PATH", ".")) / "cookie.pkl"
+WS_ENVFILE = Path(os.getenv("WS_COOKIE_PATH", ".")) / "port.env"
 
 if not all([WS_USERNAME, WS_PASSWORD]):
     print("ENV: WS_USERNAME and WS_PASSWORD need to be set")
