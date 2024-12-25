@@ -1,5 +1,5 @@
 """
-Module that run the setup for windscrib's ephemeral port
+Module that run the setup for Windscribe's ephemeral port
 """
 
 import logging
@@ -24,15 +24,15 @@ def main() -> None:
     """Main function responsible for setting up ws and qbit.
 
     Steps:
-    - check if the hearbeat was okay
+    - check if the heartbeat was okay
     - login to ws
     - setup new matching ports
     - setup qbit
     """
     if not HEARTBEAT:
         msg = (
-            "From hearbeat check, "
-            "qBitTorrent wasn't accesible. "
+            "From heartbeat check, "
+            "qBitTorrent wasn't accessible. "
             "Can't run ephemeral renewal right now."
         )
         logger.error(msg)
@@ -50,21 +50,23 @@ def main() -> None:
         )
         return
 
-    try:
-        qbit = QbitManager(
-            host=config.QBIT_HOST,
-            port=config.QBIT_PORT,
-            username=config.QBIT_USERNAME,
-            password=config.QBIT_PASSWORD,
-        )
-    except Exception:
-        logger.error("not able to work with qbit")
-        raise
-    qbit.set_listen_port(port)
+    for qbit_port in config.QBIT_PORTS:
+        try:
+            qbit = QbitManager(
+                host=config.QBIT_HOST,
+                port=qbit_port,
+                username=config.QBIT_USERNAME,
+                password=config.QBIT_PASSWORD,
+            )
+        except Exception:
+            logger.error(f"Unable to work with qBit on port {qbit_port}")
+            continue
+        
+        qbit.set_listen_port(port)
 
-    if config.QBIT_PRIVATE_TRACKER:
-        qbit.setup_private_tracker()
-    logger.info("Port setup completed..")
+        if config.QBIT_PRIVATE_TRACKER:
+            qbit.setup_private_tracker()
+        logger.info(f"Port setup completed for qBit on port {qbit_port}.")
 
 
 if __name__ == "__main__":
@@ -79,3 +81,4 @@ if __name__ == "__main__":
         while True:
             schedule.run_pending()
             time.sleep(1)
+
