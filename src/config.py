@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 # only run once
-# allows wg-ephemeral to be used as a cronjob
+# allows ws-ephemeral to be used as a cronjob
 _ONESHOT: str = os.getenv("ONESHOT", "false")
 ONESHOT: bool = True if _ONESHOT.lower() == "true" else False
 
@@ -45,18 +45,17 @@ if not all([WS_USERNAME, WS_PASSWORD]):
 USERNAME_ID: str = "username"
 PASSWORD_ID: str = "password"
 
-
-# fmt: off
 # some qbit config
 QBIT_USERNAME: str = os.getenv("QBIT_USERNAME", "default123!!")
 QBIT_PASSWORD: str = os.getenv("QBIT_PASSWORD", "default123!!")
 QBIT_HOST: str     = os.getenv("QBIT_HOST", "127.0.0.1")
-QBIT_PORT: int     = int(os.getenv("QBIT_PORT", "8080"))
-# fmt: on
 
+# Allow multiple ports, split by semicolon
+_QBIT_PORT: str = os.getenv("QBIT_PORT", "8080")
+QBIT_PORTS: list[int] = [int(port) for port in _QBIT_PORT.split(";")]
+
+# Check for qBit setup
 QBIT_FOUND = True
-# if user is running latest build without qbit env then let them run but disable the
-# qbit functions
 if QBIT_USERNAME == "default123!!" or QBIT_PASSWORD == "default123!!":
     print("QBIT related setup not found, setup env as soon as possible")
     QBIT_FOUND = False
@@ -64,10 +63,10 @@ if QBIT_USERNAME == "default123!!" or QBIT_PASSWORD == "default123!!":
 _QBIT_PRIVATE_TRACKER: str = os.getenv("QBIT_PRIVATE_TRACKER", "false")
 QBIT_PRIVATE_TRACKER: bool = True if _QBIT_PRIVATE_TRACKER.lower() == "true" else False
 
-
 # wait before setting the ephemeral ports
 try:
     DAYS: int = int(os.getenv("DAYS", 6))
 except TypeError:
     print("DAYS must be integer")
 TIME: str = os.getenv("TIME", "02:00")
+

@@ -8,8 +8,8 @@ logger = logging.getLogger("main.util")
 
 def catch_exceptions(cancel_on_failure=False):
     """
-    This decorator allow to capture the error in the schedule run and provide option
-    if job cancellation require.
+    This decorator allows capturing errors in the schedule run and provides the option
+    to cancel the job if necessary.
     """
 
     def catch_exceptions_decorator(job_func):
@@ -27,3 +27,4 @@ def catch_exceptions(cancel_on_failure=False):
         return wrapper
 
     return catch_exceptions_decorator
+
