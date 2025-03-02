@@ -1,15 +1,9 @@
-"""
-############################
-# Author: Dhruvin Shah
-# Date: 5th Sep 2022
-############################
-
-Windscribe module allow to setup the ephemeral port
-"""
+"""Windscribe module allow to setup the ephemeral port."""
 
 import logging
 import re
-from typing import TypedDict
+from types import TracebackType
+from typing import TypedDict, final
 
 import httpx
 import pyotp
@@ -27,6 +21,7 @@ class Csrf(TypedDict):
     csrf_token: str
 
 
+@final
 class Windscribe:
     """Windscribe api to enable ephemeral ports.
 
@@ -41,10 +36,10 @@ class Windscribe:
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",  # ruff: noqa: E501
         }
 
-        self.is_authenticated = True
+        self._is_authenticated = True
         cookie = load_cookie()
         if cookie is None:
-            self.is_authenticated = False
+            self._is_authenticated = False
             cookie = default_cookie()
 
         self.client = httpx.Client(
@@ -63,7 +58,12 @@ class Windscribe:
         """context manager entry"""
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(
+        self,
+        exc_type: BaseException | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """close httpx session"""
         self.close()
 
@@ -78,13 +78,13 @@ class Windscribe:
         self._is_authenticated = value
 
     def get_csrf(self) -> Csrf:
-        """windscribe make seperate request to get the csrf token"""
+        """Windscribe make separate request to get the csrf token."""
         resp = self.client.post(config.CSRF_URL)
         return resp.json()
 
     @login_required
     def renew_csrf(self) -> Csrf:
-        """after login windscribe issue new csrf token withing javascript"""
+        """After login windscribe issue new csrf token within javascript."""
         resp = self.client.get(config.MYACT_URL)
         csrf_time = re.search(r"csrf_time = (?P<ctime>\d+)", resp.text)
         if csrf_time is None:
@@ -103,7 +103,7 @@ class Windscribe:
         return new_csrf
 
     def login(self) -> None:
-        """login in to the webpage."""
+        """Login in to the webpage."""
         # NOTE: at the given moment try to resolve totp so that we don't have any delay.
         totp = ""
         if self.totp is not None:
@@ -128,9 +128,7 @@ class Windscribe:
 
     @login_required
     def delete_ephm_port(self) -> dict[str, bool | int]:
-        """
-        ensure we delete the ephemeral port setting if any available
-        """
+        """Ensure we delete the ephemeral port setting if any available."""
         data = {
             "ctime": self.csrf["csrf_time"],
             "ctoken": self.csrf["csrf_token"],
@@ -143,9 +141,7 @@ class Windscribe:
 
     @login_required
     def set_matching_port(self) -> int:
-        """
-        setup matching ephemeral port on WS
-        """
+        """Setup matching ephemeral port on WS."""
         data = {
             # keeping port empty makes it to request matching port
             "port": "",
@@ -170,11 +166,11 @@ class Windscribe:
 
     def setup(self) -> int:
         """perform ephemeral port setup here"""
-        # after login we need to update the csrf token agian,
+        # after login we need to update the csrf token again,
         # windscribe puts new csrf token in the javascript
         self.csrf = self.renew_csrf()
 
-        self.delete_ephm_port()
+        _ = self.delete_ephm_port()
         return self.set_matching_port()
 
     def close(self) -> None:
