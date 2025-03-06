@@ -6,7 +6,11 @@ import config
 
 
 def default_cookie() -> Cookies:
-    """Build default cookie."""
+    """Build default cookie.
+
+    Returns:
+        Cookies: The default cookie object.
+    """
     cookie = Cookies()
     cookie.set("i_can_has_cookie", "1")
     cookie.set("ref", "https://windscribe.com/")
@@ -16,7 +20,10 @@ def default_cookie() -> Cookies:
 def load_cookie() -> None | Cookies:
     """Load existing cookie.
 
-    Read the pickle back and create the cookie object for httpx.
+    Reads the pickle file and creates the cookie object for httpx.
+
+    Returns:
+        None | Cookies: The loaded cookie object, or None if the file does not exist.
     """
     if not config.WS_COOKIE.exists():
         return None
@@ -31,12 +38,13 @@ def load_cookie() -> None | Cookies:
 
 
 def save_cookie(cookie: Cookies) -> None:
-    """Save the cookie to the file for future use.
+    """Save the cookie to a file for future use.
 
-    Read the cookie data and convert to regular dictinary object so that it can be
+    Reads the cookie data and converts it to a regular dictionary object so that it can be
     pickled to a file.
 
-    :param cookie: a cookie object from httpx requests.
+    Args:
+        cookie (Cookies): A cookie object from httpx requests.
     """
     cookie_dict: dict[str, str] = {}
     for k, v in cookie.items():

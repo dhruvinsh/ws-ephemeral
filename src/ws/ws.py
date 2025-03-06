@@ -1,4 +1,8 @@
-"""Windscribe module allow to setup the ephemeral port."""
+"""Windscribe module to setup ephemeral ports.
+
+This module provides the Windscribe class to interact with the Windscribe API,
+allowing users to manage ephemeral ports and handle authentication.
+"""
 
 import logging
 import re
@@ -23,9 +27,18 @@ class Csrf(TypedDict):
 
 @final
 class Windscribe:
-    """Windscribe api to enable ephemeral ports.
+    """Windscribe API to enable ephemeral ports.
 
-    Only works with non 2FA account (for now).
+    This class handles authentication, CSRF token management, and API requests
+    to set or delete ephemeral ports. Only works with non-2FA accounts (for now).
+
+    Attributes:
+        client (httpx.Client): The HTTP client for making requests.
+        csrf (Csrf): The CSRF token and time.
+        username (str): The username for authentication.
+        password (str): The password for authentication.
+        totp (str | None): The TOTP secret for 2FA, if available.
+        logger (logging.Logger): Logger for the class.
     """
 
     # pylint: disable=redefined-outer-name
@@ -55,7 +68,11 @@ class Windscribe:
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def __enter__(self) -> "Windscribe":
-        """context manager entry"""
+        """Context manager entry.
+
+        Returns:
+            Windscribe: The Windscribe instance.
+        """
         return self
 
     def __exit__(
@@ -64,27 +81,58 @@ class Windscribe:
         exc_value: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        """close httpx session"""
+        """Context manager exit.
+
+        Closes the HTTP client session.
+
+        Args:
+            exc_type (BaseException | None): The exception type, if any.
+            exc_value (BaseException | None): The exception value, if any.
+            traceback (TracebackType | None): The traceback, if any.
+        """
         self.close()
 
     @property
     def is_authenticated(self) -> bool:
-        """If session is authenticated."""
+        """Check if session is authenticated.
+
+        Returns:
+            bool: True if authenticated, False otherwise.
+        """
         return self._is_authenticated
 
     @is_authenticated.setter
     def is_authenticated(self, value: bool) -> None:
-        """Set authentication status."""
+        """Set authentication status.
+
+        Args:
+            value (bool): The new authentication status.
+        """
         self._is_authenticated = value
 
     def get_csrf(self) -> Csrf:
-        """Windscribe make separate request to get the csrf token."""
+        """Get CSRF token.
+
+        Makes a request to the Windscribe API to get the CSRF token.
+
+        Returns:
+            Csrf: The CSRF token and time.
+        """
         resp = self.client.post(config.CSRF_URL)
         return resp.json()
 
     @login_required
     def renew_csrf(self) -> Csrf:
-        """After login windscribe issue new csrf token within javascript."""
+        """Renew CSRF token.
+
+        After login, Windscribe issues a new CSRF token within JavaScript.
+
+        Returns:
+            Csrf: The new CSRF token and time.
+
+        Raises:
+            ValueError: If CSRF time or token is not found.
+        """
         resp = self.client.get(config.MYACT_URL)
         csrf_time = re.search(r"csrf_time = (?P<ctime>\d+)", resp.text)
         if csrf_time is None:
@@ -103,7 +151,11 @@ class Windscribe:
         return new_csrf
 
     def login(self) -> None:
-        """Login in to the webpage."""
+        """Login to the Windscribe webpage.
+
+        Authenticates the user using the provided username, password, and TOTP code (if available).
+        Updates the CSRF token and saves the session cookies for future use.
+        """
         # NOTE: at the given moment try to resolve totp so that we don't have any delay.
         totp = ""
         if self.totp is not None:
@@ -128,7 +180,13 @@ class Windscribe:
 
     @login_required
     def delete_ephm_port(self) -> dict[str, bool | int]:
-        """Ensure we delete the ephemeral port setting if any available."""
+        """Delete ephemeral port.
+
+        Ensures that any existing ephemeral port setting is deleted.
+
+        Returns:
+            dict[str, bool | int]: The response from the API.
+        """
         data = {
             "ctime": self.csrf["csrf_time"],
             "ctoken": self.csrf["csrf_token"],
@@ -141,7 +199,16 @@ class Windscribe:
 
     @login_required
     def set_matching_port(self) -> int:
-        """Setup matching ephemeral port on WS."""
+        """Set matching ephemeral port.
+
+        Sets up a matching ephemeral port on Windscribe.
+
+        Returns:
+            int: The matching ephemeral port.
+
+        Raises:
+            ValueError: If unable to set up a matching ephemeral port or if the external and internal ports do not match.
+        """
         data = {
             # keeping port empty makes it to request matching port
             "port": "",
@@ -165,7 +232,14 @@ class Windscribe:
         return internal
 
     def setup(self) -> int:
-        """perform ephemeral port setup here"""
+        """Perform ephemeral port setup.
+
+        After login, updates the CSRF token, deletes any existing ephemeral port,
+        and sets up a new matching ephemeral port.
+
+        Returns:
+            int: The new matching ephemeral port.
+        """
         # after login we need to update the csrf token again,
         # windscribe puts new csrf token in the javascript
         self.csrf = self.renew_csrf()
@@ -174,6 +248,9 @@ class Windscribe:
         return self.set_matching_port()
 
     def close(self) -> None:
-        """close httpx session"""
+        """Close HTTP client session.
+
+        Closes the HTTP client session and logs the action.
+        """
         self.logger.debug("closing session")
         self.client.close()
