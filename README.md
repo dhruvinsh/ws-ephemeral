@@ -1,5 +1,12 @@
 # WS-EPHEMERAL
 
+> [!ATTENTION] Please use this tool responsibly. Excessive or inappropriate
+> usage may result in temporary suspension of your account. Due to lack of
+> time I will try to revisit sometime in future but I strongly advice to let
+> it run at default pace, that is once every week. For new user cookie generation
+> might fail at the beginning, please try again after some time once you delete
+> partially created cookie.
+
 This project aims to automate setting up ephemeral port on Windscribe VPN
 service for the purpose of port forwarding. Once the setup is done it wait
 patiently for next seven days. It delete the ephemeral port setting if any and
