@@ -12,10 +12,33 @@ from semver.version import Version
 class QbitManager:
     __slots__ = ["api", "client", "logger"]
 
-    def __init__(self, host: str, port: int, username: str, password: str) -> None:
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        username: str | None = None,
+        password: str | None = None,
+        api_key: str | None = None,
+    ) -> None:
+        if api_key and (username or password):
+            raise ValueError("Use either qBittorrent API key or username/password")
+        if not api_key and not (username and password):
+            raise ValueError("qBittorrent authentication is not configured")
+
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        self.client = Client(host, port, username, password, SIMPLE_RESPONSES=True)
+        if api_key:
+            self.client = Client(
+                host=host, port=port, api_key=api_key, SIMPLE_RESPONSES=True
+            )
+        else:
+            self.client = Client(
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                SIMPLE_RESPONSES=True,
+            )
         try:
             self.api = Version.parse(self.client.app_web_api_version())
         except Exception as e:

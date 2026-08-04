@@ -25,6 +25,7 @@ def monitor() -> bool:
             port=config.QBIT_PORT,
             username=config.QBIT_USERNAME,
             password=config.QBIT_PASSWORD,
+            api_key=config.QBIT_API_KEY,
         )
     except Exception:
         logging.error("Something wrong with Qbit, it's not accessible")

@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### 🚀 Features
 
 - Synchronize Windscribe's ephemeral port with Gluetun's runtime VPN firewall.
+- Support qBittorrent API-key authentication.
 
 ## [3.2.0] - 2024-08-26
 

@@ -48,18 +48,24 @@ PASSWORD_ID: str = "password"
 
 # fmt: off
 # some qbit config
-QBIT_USERNAME: str = os.getenv("QBIT_USERNAME", "default123!!")
-QBIT_PASSWORD: str = os.getenv("QBIT_PASSWORD", "default123!!")
-QBIT_HOST: str     = os.getenv("QBIT_HOST", "127.0.0.1")
-QBIT_PORT: int     = int(os.getenv("QBIT_PORT", "8080"))
+QBIT_USERNAME: str | None = os.getenv("QBIT_USERNAME") or None
+QBIT_PASSWORD: str | None = os.getenv("QBIT_PASSWORD") or None
+QBIT_API_KEY: str | None  = os.getenv("QBIT_API_KEY") or None
+QBIT_HOST: str            = os.getenv("QBIT_HOST", "127.0.0.1")
+QBIT_PORT: int            = int(os.getenv("QBIT_PORT", "8080"))
 # fmt: on
 
-qbit_found = True
-# if user is running latest build without qbit env then let them run but disable the
-# qbit functions
-if QBIT_USERNAME == "default123!!" or QBIT_PASSWORD == "default123!!":
+if QBIT_API_KEY and (QBIT_USERNAME or QBIT_PASSWORD):
+    print("ENV: use either QBIT_API_KEY or qBittorrent username/password")
+    sys.exit(1)
+
+if not QBIT_API_KEY and bool(QBIT_USERNAME) != bool(QBIT_PASSWORD):
+    print("ENV: QBIT_USERNAME and QBIT_PASSWORD must be set together")
+    sys.exit(1)
+
+qbit_found = bool(QBIT_API_KEY or (QBIT_USERNAME and QBIT_PASSWORD))
+if not qbit_found:
     print("QBIT related setup not found, setup env as soon as possible")
-    qbit_found = False
 
 _QBIT_PRIVATE_TRACKER: str = os.getenv("QBIT_PRIVATE_TRACKER", "false")
 QBIT_PRIVATE_TRACKER: bool = True if _QBIT_PRIVATE_TRACKER.lower() == "true" else False

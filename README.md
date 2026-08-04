@@ -81,6 +81,7 @@ docker compose up -d
 | WS_COOKIE_PATH       | Persistent location for the cookie. (v3.x.x only)                                |
 | QBIT_USERNAME        | QBIT username                                                                    |
 | QBIT_PASSWORD        | QBIT password                                                                    |
+| QBIT_API_KEY         | QBIT API key; alternative to username/password and requires qBittorrent v5.2.0+ |
 | QBIT_HOST            | QBIT web address like, https://qbit.xyz.com or http://192.168.1.10               |
 | QBIT_PORT            | QBIT web port number like, 443 or 8080                                           |
 | QBIT_PRIVATE_TRACKER | get QBIT ready for private tracker by disabling dht, pex and lsd (true or false) |
@@ -93,6 +94,26 @@ docker compose up -d
 
 > [!tip]
 > NOTE: for usage see [Docker Setup](#docker-setup) v2 setup guide.
+
+### qBittorrent authentication
+
+Use either a qBittorrent username and password:
+
+```env
+QBIT_USERNAME=admin
+QBIT_PASSWORD=replace-with-password
+```
+
+Or, with qBittorrent v5.2.0 or newer, generate an API key in its WebUI settings
+and configure:
+
+```env
+QBIT_API_KEY=qbt_replace_with_api_key
+```
+
+Do not configure `QBIT_API_KEY` together with `QBIT_USERNAME` or
+`QBIT_PASSWORD`. API-key support requires `qbittorrent-api` v2026.5.3 or newer,
+which is included in this project.
 
 ### Gluetun VPN firewall synchronization
 

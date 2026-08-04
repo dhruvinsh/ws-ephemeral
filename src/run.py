@@ -68,6 +68,7 @@ def main() -> None:
             port=config.QBIT_PORT,
             username=config.QBIT_USERNAME,
             password=config.QBIT_PASSWORD,
+            api_key=config.QBIT_API_KEY,
         )
     except Exception:
         logger.error("not able to work with qbit")
