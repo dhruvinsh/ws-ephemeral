@@ -1,9 +1,7 @@
-version: "3.8"
-
 services:
   ws-ephemeral:
     container_name: ws-ephemeral
-    image: dhruvinsh/ws-ephemeral:latest
+    image: ${WS_EPHEMERAL_IMAGE:-ghcr.io/dhruvinsh/ws-ephemeral:latest}
     env_file: .env.example
     restart: unless-stopped
     volumes:

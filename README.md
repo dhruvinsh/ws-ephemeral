@@ -24,10 +24,9 @@ Windscribe VPN and need to open the ports.
 
 ### Registries
 
-There are two registries available:
+Images are published to GitHub Container Registry under the repository owner:
 
-- dhruvinsh/ws-ephemeral
-- ghcr.io/dhruvinsh/ws-ephemeral
+- `ghcr.io/<repository-owner>/ws-ephemeral`
 
 ### Tags
 
@@ -38,6 +37,7 @@ Available tags for docker image (based on semver):
 | main   | straight from `main` branch    |
 | latest | latest stable released version |
 | x      | specific major version         |
+| x.x    | specific minor version         |
 | x.x.x  | specific version               |
 
 ### Deploy
@@ -59,12 +59,13 @@ docker run \
 -e WS_USERNAME=username \
 -e WS_TOPT=totp_token \
 -v /path/to/local/data:/cookie \
-dhruvinsh/ws-ephemeral:latest
+ghcr.io/<repository-owner>/ws-ephemeral:latest
 ```
 
 #### Docker-compose
 
-Docker compose file is provided for example, make some adjustment and run as,
+Docker compose file is provided for example. Set `WS_EPHEMERAL_IMAGE` to the
+GHCR image for a fork if needed, make any other adjustments, and run:
 
 ```bash
 docker compose up -d
