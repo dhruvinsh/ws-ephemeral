@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### 🚀 Features
+
+- Synchronize Windscribe's ephemeral port with Gluetun's runtime VPN firewall.
+
 ## [3.2.0] - 2024-08-26
 
 ### 🚀 Features

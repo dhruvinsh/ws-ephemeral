@@ -65,6 +65,21 @@ _QBIT_PRIVATE_TRACKER: str = os.getenv("QBIT_PRIVATE_TRACKER", "false")
 QBIT_PRIVATE_TRACKER: bool = True if _QBIT_PRIVATE_TRACKER.lower() == "true" else False
 
 
+# Gluetun control server config. Setting GLUETUN_URL enables port synchronization.
+GLUETUN_URL: str | None = os.getenv("GLUETUN_URL") or None
+GLUETUN_API_KEY: str | None = os.getenv("GLUETUN_API_KEY") or None
+GLUETUN_USERNAME: str | None = os.getenv("GLUETUN_USERNAME") or None
+GLUETUN_PASSWORD: str | None = os.getenv("GLUETUN_PASSWORD") or None
+
+if GLUETUN_URL and bool(GLUETUN_USERNAME) != bool(GLUETUN_PASSWORD):
+    print("ENV: GLUETUN_USERNAME and GLUETUN_PASSWORD must be set together")
+    sys.exit(1)
+
+if GLUETUN_URL and GLUETUN_API_KEY and GLUETUN_USERNAME:
+    print("ENV: use either GLUETUN_API_KEY or Gluetun username/password")
+    sys.exit(1)
+
+
 # wait before setting the ephemeral ports
 try:
     DAYS: int = int(os.getenv("DAYS", 6))

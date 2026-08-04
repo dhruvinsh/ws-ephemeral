@@ -84,11 +84,60 @@ docker compose up -d
 | QBIT_HOST            | QBIT web address like, https://qbit.xyz.com or http://192.168.1.10               |
 | QBIT_PORT            | QBIT web port number like, 443 or 8080                                           |
 | QBIT_PRIVATE_TRACKER | get QBIT ready for private tracker by disabling dht, pex and lsd (true or false) |
+| GLUETUN_URL           | Gluetun control server URL; setting it enables VPN firewall port synchronization  |
+| GLUETUN_API_KEY       | API key for the Gluetun control server, if API-key authentication is configured   |
+| GLUETUN_USERNAME      | Username for Gluetun control server basic authentication                          |
+| GLUETUN_PASSWORD      | Password for Gluetun control server basic authentication                          |
 | ONESHOT              | Run and setup the code only one time so that job can be schedule externally      |
 | REQUEST_TIMEOUT      | configurable http api timeout for slow network/busy websites                     |
 
 > [!tip]
 > NOTE: for usage see [Docker Setup](#docker-setup) v2 setup guide.
+
+### Gluetun VPN firewall synchronization
+
+ws-ephemeral can replace Gluetun's runtime VPN firewall port whenever
+Windscribe assigns a new matching port. This removes the need to update
+`FIREWALL_VPN_INPUT_PORTS` and restart Gluetun for each renewal.
+`FIREWALL_INPUT_PORTS` controls Gluetun's default interface and does not need
+the Windscribe-assigned port unless you separately want that port reachable
+through the default interface.
+
+This integration requires a Gluetun release containing
+[`PUT /v1/portforward`](https://github.com/passteque/gluetun/pull/2392).
+Gluetun v3.41.2 does not contain that endpoint. Leave Gluetun's
+`VPN_PORT_FORWARDING` option off because ws-ephemeral obtains the port from
+Windscribe.
+
+Set `GLUETUN_URL` to enable the integration:
+
+```env
+GLUETUN_URL=http://gluetun:8000
+GLUETUN_API_KEY=replace-with-api-key
+```
+
+Use `http://127.0.0.1:8000` instead when ws-ephemeral shares Gluetun's network
+namespace. The control server does not need to be published outside the Docker
+network.
+
+Gluetun must authorize both the update and verification routes. For API-key
+authentication, its `/gluetun/auth/config.toml` can include:
+
+```toml
+[[roles]]
+name = "ws-ephemeral"
+routes = ["PUT /v1/portforward", "GET /v1/portforward"]
+auth = "apikey"
+apikey = "replace-with-api-key"
+```
+
+Alternatively, set `GLUETUN_USERNAME` and `GLUETUN_PASSWORD` for a basic-auth
+role. Do not set them together with `GLUETUN_API_KEY`. If the matching Gluetun
+role uses `auth = "none"`, only `GLUETUN_URL` is needed.
+
+The change is runtime state. Restarting Gluetun clears it, so restart
+ws-ephemeral with Gluetun or otherwise run ws-ephemeral again after a Gluetun
+restart.
 
 ## Unraid Setup
 
@@ -113,7 +162,7 @@ or concerns, please open an issue here.
   - [ ] Random job time for cron job #15
 - [ ] Allow to run custom script (for now Bash script only) #12
 - [ ] Support for deluge
-- [ ] Gluetun support [#2392](https://github.com/qdm12/gluetun/pull/2392)
+- [x] Gluetun support [#2392](https://github.com/passteque/gluetun/pull/2392)
 
 ## License
 
