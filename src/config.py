@@ -18,11 +18,21 @@ REQUEST_TIMEOUT: int | None = None if _REQUEST_TIMEOUT == -1 else _REQUEST_TIMEO
 
 BASE_PATH: Path = Path(".")
 
-# common config
-CSRF_URL: str = "https://res.windscribe.com/res/logintoken"
+# windscribe's website sits behind a bot protection, so authentication is done
+# through the desktop client api instead.
+WS_APP_VERSION: str = "2.16.14"
+WS_PLATFORM: str = "windows"
+WS_API_PARAMS: dict[str, str] = {
+    "platform": WS_PLATFORM,
+    "app_version": WS_APP_VERSION,
+}
+
+API_URL: str = "https://api.windscribe.com/"
+AUTH_TOKEN_URL: str = API_URL + "AuthToken/login"
+SESSION_URL: str = API_URL + "Session"
+WEB_SESSION_URL: str = API_URL + "WebSession"
 
 BASE_URL: str = "https://windscribe.com/"
-LOGIN_URL: str = BASE_URL + "login"
 MYACT_URL: str = BASE_URL + "myaccount"
 
 STATICIP: str = BASE_URL + "staticips/"
@@ -34,16 +44,13 @@ SET_EPHEM_URL: str = STATICIP + "postEphPort"
 WS_USERNAME: str = os.getenv("WS_USERNAME", "")
 WS_PASSWORD: str = os.getenv("WS_PASSWORD", "")
 WS_TOTP: str | None = os.getenv("WS_TOTP", None)
-WS_COOKIE = Path(os.getenv("WS_COOKIE_PATH", ".")) / "cookie.pkl"
+# an existing api session hash can be provided to skip the password login
+WS_AUTH_HASH: str | None = os.getenv("WS_AUTH_HASH") or None
+WS_SESSION: Path = Path(os.getenv("WS_COOKIE_PATH", ".")) / "session.json"
 
-if not all([WS_USERNAME, WS_PASSWORD]):
+if not WS_AUTH_HASH and not all([WS_USERNAME, WS_PASSWORD]):
     print("ENV: WS_USERNAME and WS_PASSWORD need to be set")
     sys.exit(1)
-
-# some HTML id for the login purpose
-# TODO: expose via config file
-USERNAME_ID: str = "username"
-PASSWORD_ID: str = "password"
 
 
 # fmt: off

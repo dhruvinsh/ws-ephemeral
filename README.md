@@ -4,12 +4,14 @@
 > Please use this tool responsibly. Excessive or inappropriate
 > usage may result in temporary suspension of your account. Due to lack of
 > time I will try to revisit sometime in future but I strongly advice to let
-> it run at default pace, that is once every week. For new user cookie generation
-> might fail at the beginning, please try again after some time once you delete
-> partially created cookie.
+> it run at default pace, that is once every week.
 
 > [!NOTE]
-> **Current State of the Project:** There are upstream web changes affecting this project. I am also suffering from issue and I would like implement fixes but lack of time its not possible at the moment. I plan to get back to it as soon as possible.
+> **Current State of the Project:** Windscribe put its website behind a bot
+> protection, so the login now goes through the desktop client api
+> (`api.windscribe.com`) and the resulting session is exchanged for a website
+> session. The slider captcha that comes with that login is solved locally, no
+> browser or captcha service is needed.
 
 This project aims to automate setting up ephemeral port on Windscribe VPN
 service for the purpose of port forwarding. Once the setup is done it wait
@@ -77,8 +79,9 @@ docker compose up -d
 | WS_USERNAME          | WS username                                                                      |
 | WS_PASSWORD          | WS password                                                                      |
 | WS_TOTP              | WS totp token for 2fa                                                            |
+| WS_AUTH_HASH         | Optional existing api session hash, skips the username/password login            |
 | WS_DEBUG             | Enable Debug logging                                                             |
-| WS_COOKIE_PATH       | Persistent location for the cookie. (v3.x.x only)                                |
+| WS_COOKIE_PATH       | Persistent location for the session cache. (v3.x.x only)                         |
 | QBIT_USERNAME        | QBIT username                                                                    |
 | QBIT_PASSWORD        | QBIT password                                                                    |
 | QBIT_HOST            | QBIT web address like, https://qbit.xyz.com or http://192.168.1.10               |
@@ -89,6 +92,17 @@ docker compose up -d
 
 > [!tip]
 > NOTE: for usage see [Docker Setup](#docker-setup) v2 setup guide.
+
+> [!tip]
+> `WS_COOKIE_PATH` should point to a persistent volume. The session is cached
+> there (`session.json`) so that the login, and its captcha, only happen when
+> the cached session is no longer accepted.
+
+> [!tip]
+> `WS_AUTH_HASH` is only needed as an escape hatch, for example when Windscribe
+> serves a captcha that cannot be solved headlessly. It is the
+> `session_auth_hash` value returned by `POST https://api.windscribe.com/Session`,
+> and it is what the desktop client stores after a successful login.
 
 ## Unraid Setup
 

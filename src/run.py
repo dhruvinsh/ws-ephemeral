@@ -40,7 +40,10 @@ def main() -> None:
 
     logger.info("Running automation...")
     with Windscribe(
-        username=config.WS_USERNAME, password=config.WS_PASSWORD, totp=config.WS_TOTP
+        username=config.WS_USERNAME,
+        password=config.WS_PASSWORD,
+        totp=config.WS_TOTP,
+        auth_hash=config.WS_AUTH_HASH,
     ) as ws:
         port = ws.setup()
 

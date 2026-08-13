@@ -7,7 +7,7 @@ authors = ["Dhruvin Shah <dhruvin3@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.11"
 httpx = ">=0.23.0"
-qbittorrent-api = ">=2023.3.44"
+qbittorrent-api = ">=2026.5.0"
 tqdm = "^4.65.0"
 pyyaml = "^6.0"
 semver = "^3.0.0"
