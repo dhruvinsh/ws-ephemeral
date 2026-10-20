@@ -19,16 +19,12 @@ REQUEST_TIMEOUT: int | None = None if _REQUEST_TIMEOUT == -1 else _REQUEST_TIMEO
 BASE_PATH: Path = Path(".")
 
 # common config
-CSRF_URL: str = "https://res.windscribe.com/res/logintoken"
-
 BASE_URL: str = "https://windscribe.com/"
-LOGIN_URL: str = BASE_URL + "login"
-MYACT_URL: str = BASE_URL + "myaccount"
+API_URL: str = "https://api.windscribe.com/"
 
-STATICIP: str = BASE_URL + "staticips/"
-EPHEM_URL: str = STATICIP + "load"
-DEL_EPHEM_URL: str = STATICIP + "deleteEphPort"
-SET_EPHEM_URL: str = STATICIP + "postEphPort"
+AUTH_TOKEN_URL: str = API_URL + "AuthToken/login"
+SESSION_URL: str = API_URL + "Session"
+EPHEM_URL: str = API_URL + "EphPortForwarding"
 
 # WS config
 WS_USERNAME: str = os.getenv("WS_USERNAME", "")
@@ -39,12 +35,6 @@ WS_COOKIE = Path(os.getenv("WS_COOKIE_PATH", ".")) / "cookie.pkl"
 if not all([WS_USERNAME, WS_PASSWORD]):
     print("ENV: WS_USERNAME and WS_PASSWORD need to be set")
     sys.exit(1)
-
-# some HTML id for the login purpose
-# TODO: expose via config file
-USERNAME_ID: str = "username"
-PASSWORD_ID: str = "password"
-
 
 # fmt: off
 # some qbit config

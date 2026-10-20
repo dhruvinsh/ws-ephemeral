@@ -1,54 +1,42 @@
 import pickle
 
-from httpx import Cookies
-
 import config
 
-
-def default_cookie() -> Cookies:
-    """Build default cookie.
-
-    Returns:
-        Cookies: The default cookie object.
-    """
-    cookie = Cookies()
-    cookie.set("i_can_has_cookie", "1")
-    cookie.set("ref", "https://windscribe.com/")
-    return cookie
+# Windscribe's web session cookie, its value is the same session token that the
+# API expects as `Authorization: Bearer <token>`. Keeping the same name/format as
+# the previous cookie file means an already cached cookie keeps working.
+SESSION_KEY = "ws_session_auth_hash"
 
 
-def load_cookie() -> None | Cookies:
-    """Load existing cookie.
+def load_token() -> str | None:
+    """Load the cached session token.
 
-    Reads the pickle file and creates the cookie object for httpx.
+    Reads the pickle file and looks for the session token.
 
     Returns:
-        None | Cookies: The loaded cookie object, or None if the file does not exist.
+        str | None: The session token, or None if there is nothing cached.
     """
     if not config.WS_COOKIE.exists():
         return None
 
-    cookie = Cookies()
-    with open(config.WS_COOKIE, "rb") as ck:
-        cookie_dict = pickle.load(ck)
-        for k, v in cookie_dict.items():
-            cookie.set(k, v)
+    try:
+        with open(config.WS_COOKIE, "rb") as ck:
+            cookie_dict = pickle.load(ck)
+    except (pickle.UnpicklingError, EOFError):
+        return None
 
-    return cookie
+    if not isinstance(cookie_dict, dict):
+        return None
+
+    return cookie_dict.get(SESSION_KEY) or None
 
 
-def save_cookie(cookie: Cookies) -> None:
-    """Save the cookie to a file for future use.
-
-    Reads the cookie data and converts it to a regular dictionary object so that it can be
-    pickled to a file.
+def save_token(token: str) -> None:
+    """Save the session token to a file for future use.
 
     Args:
-        cookie (Cookies): A cookie object from httpx requests.
+        token (str): The session token returned by the Windscribe API.
     """
-    cookie_dict: dict[str, str] = {}
-    for k, v in cookie.items():
-        cookie_dict[k] = v
-
+    config.WS_COOKIE.parent.mkdir(parents=True, exist_ok=True)
     with open(config.WS_COOKIE, "wb") as ck:
-        pickle.dump(cookie_dict, ck)
+        pickle.dump({SESSION_KEY: token}, ck)

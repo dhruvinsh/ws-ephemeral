@@ -5,9 +5,8 @@ allowing users to manage ephemeral ports and handle authentication.
 """
 
 import logging
-import re
 from types import TracebackType
-from typing import TypedDict, final
+from typing import Any, final
 
 import httpx
 import pyotp
@@ -15,26 +14,32 @@ import pyotp
 import config
 from lib.decorators import login_required
 
-from .cookie import default_cookie, load_cookie, save_cookie
+from .cookie import load_token, save_token
+
+# error codes returned by the API when the session token is missing/rejected
+_SESSION_ERROR_CODES = {500, 701}
 
 
-class Csrf(TypedDict):
-    """CSRF type dict"""
+class WindscribeError(Exception):
+    """Error reported by the Windscribe API."""
 
-    csrf_time: int
-    csrf_token: str
+    def __init__(self, code: int | None, message: str) -> None:
+        super().__init__(f"[{code}] {message}")
+        self.code = code
+        self.message = message
 
 
 @final
 class Windscribe:
     """Windscribe API to enable ephemeral ports.
 
-    This class handles authentication, CSRF token management, and API requests
-    to set or delete ephemeral ports. Only works with non-2FA accounts (for now).
+    This class handles authentication and API requests to set or delete ephemeral
+    ports. Login is a two step process against the API, which results in a session
+    token that is cached and sent as a bearer token on every other request.
 
     Attributes:
         client (httpx.Client): The HTTP client for making requests.
-        csrf (Csrf): The CSRF token and time.
+        token (str | None): The session token, if available.
         username (str): The username for authentication.
         password (str): The password for authentication.
         totp (str | None): The TOTP secret for 2FA, if available.
@@ -44,23 +49,15 @@ class Windscribe:
     # pylint: disable=redefined-outer-name
     def __init__(self, username: str, password: str, totp: str | None = None) -> None:
         headers = {
-            "origin": config.BASE_URL,
-            "referer": config.LOGIN_URL,
+            "origin": config.BASE_URL.rstrip("/"),
+            "referer": config.BASE_URL,
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",  # ruff: noqa: E501
         }
 
-        self._is_authenticated = True
-        cookie = load_cookie()
-        if cookie is None:
-            self._is_authenticated = False
-            cookie = default_cookie()
+        self.token: str | None = load_token()
+        self._is_authenticated = self.token is not None
 
-        self.client = httpx.Client(
-            headers=headers, cookies=cookie, timeout=config.REQUEST_TIMEOUT
-        )
-
-        # we will populate this later in the login call
-        self.csrf: Csrf = self.get_csrf()
+        self.client = httpx.Client(headers=headers, timeout=config.REQUEST_TIMEOUT)
         self.username = username
         self.password = password
         self.totp = totp
@@ -110,92 +107,130 @@ class Windscribe:
         """
         self._is_authenticated = value
 
-    def get_csrf(self) -> Csrf:
-        """Get CSRF token.
+    @staticmethod
+    def _data(resp: httpx.Response) -> dict[str, Any]:
+        """Unwrap the API response.
 
-        Makes a request to the Windscribe API to get the CSRF token.
-
-        Returns:
-            Csrf: The CSRF token and time.
-        """
-        resp = self.client.post(config.CSRF_URL)
-        return resp.json()
-
-    @login_required
-    def renew_csrf(self) -> Csrf:
-        """Renew CSRF token.
-
-        After login, Windscribe issues a new CSRF token within JavaScript.
+        Args:
+            resp (httpx.Response): The response from the API.
 
         Returns:
-            Csrf: The new CSRF token and time.
+            dict[str, Any]: The `data` part of the response.
 
         Raises:
-            ValueError: If CSRF time or token is not found.
+            WindscribeError: If the API reported an error.
         """
-        resp = self.client.get(config.MYACT_URL)
-        csrf_time = re.search(r"csrf_time = (?P<ctime>\d+)", resp.text)
-        if csrf_time is None:
-            raise ValueError("Can not work further, csrf_time not found, exited.")
+        try:
+            body = resp.json()
+        except ValueError as exc:
+            raise WindscribeError(
+                None, f"unexpected response (HTTP {resp.status_code})"
+            ) from exc
 
-        csrf_token = re.search(r"csrf_token = \'(?P<ctoken>\w+)\'", resp.text)
-        if csrf_token is None:
-            raise ValueError("Can not work further, csrf_token not found, exited.")
+        if "errorCode" in body:
+            raise WindscribeError(
+                body["errorCode"], body.get("errorDescription") or body["errorMessage"]
+            )
 
-        new_csrf: Csrf = {
-            "csrf_time": int(csrf_time.groupdict()["ctime"]),
-            "csrf_token": csrf_token.groupdict()["ctoken"],
-        }
+        return body["data"]
 
-        self.logger.debug("csrf renewed successfully.")
-        return new_csrf
+    def _request(self, method: str, url: str, **kwargs: Any) -> dict[str, Any]:
+        """Make an authenticated API request.
+
+        If the API rejects the session token (expired or revoked), login again once and
+        retry the request.
+
+        Args:
+            method (str): The HTTP method.
+            url (str): The API url.
+            **kwargs: Passed to the httpx request, `data` gets the session token added.
+
+        Returns:
+            dict[str, Any]: The `data` part of the response.
+        """
+        for attempt in (1, 2):
+            headers = {"authorization": f"Bearer {self.token or 'anonymous'}"}
+            if method != "GET":
+                kwargs["data"] = {
+                    "session_auth_hash": self.token,
+                    **kwargs.get("data", {}),
+                }
+            resp = self.client.request(method, url, headers=headers, **kwargs)
+
+            try:
+                return self._data(resp)
+            except WindscribeError as exc:
+                if exc.code not in _SESSION_ERROR_CODES or attempt == 2:
+                    raise
+
+                self.logger.warning("session rejected (%s), logging in again", exc)
+                self.login()
+
+        raise AssertionError("unreachable")
 
     def login(self) -> None:
-        """Login to the Windscribe webpage.
+        """Login to Windscribe.
 
-        Authenticates the user using the provided username, password, and TOTP code (if available).
-        Updates the CSRF token and saves the session cookies for future use.
+        Fetches a one time login token and exchanges it, together with the credentials
+        and TOTP code (if available), for a session token. The session token is saved
+        for the future use.
         """
-        # NOTE: at the given moment try to resolve totp so that we don't have any delay.
-        totp = ""
-        if self.totp is not None:
-            totp = pyotp.TOTP(self.totp).now()
+        resp = self.client.post(
+            config.AUTH_TOKEN_URL,
+            json={"username": self.username, "password": self.password},
+            headers={"authorization": "Bearer anonymous"},
+        )
+        auth = self._data(resp)
 
-        data = {
-            "login": 1,
-            "upgrade": 0,
-            "csrf_time": self.csrf["csrf_time"],
-            "csrf_token": self.csrf["csrf_token"],
+        payload: dict[str, Any] = {
             "username": self.username,
             "password": self.password,
-            "code": totp,
+            "session_type_id": 1,
+            "platform": "legacy-web",
+            "secure_token": auth["token"],
+            "secure_token_sig": auth["token_sig"],
         }
-        _ = self.client.post(config.LOGIN_URL, data=data)
+        # NOTE: resolve totp at the given moment so that we don't have any delay.
+        if self.totp is not None:
+            payload["2fa_code"] = pyotp.TOTP(self.totp).now()
 
-        # save the cookie for the future use.
-        save_cookie(self.client.cookies)
+        resp = self.client.post(
+            config.SESSION_URL,
+            json=payload,
+            headers={"authorization": "Bearer anonymous"},
+        )
+        session = self._data(resp)
+
+        self.token = session["session_auth_hash"]
+        save_token(self.token)
 
         self.is_authenticated = True
         self.logger.debug("login successful")
 
     @login_required
-    def delete_ephm_port(self) -> dict[str, bool | int]:
-        """Delete ephemeral port.
-
-        Ensures that any existing ephemeral port setting is deleted.
+    def get_ephm_port(self) -> int | None:
+        """Get the current ephemeral port.
 
         Returns:
-            dict[str, bool | int]: The response from the API.
+            int | None: The external port, or None if no ephemeral port is set.
         """
-        data = {
-            "ctime": self.csrf["csrf_time"],
-            "ctoken": self.csrf["csrf_token"],
-        }
-        resp = self.client.post(config.DEL_EPHEM_URL, data=data)
-        res = resp.json()
-        self.logger.debug("ephimeral port deleted: %s", res)
+        epf = self._request("GET", config.EPHEM_URL)["epf"]
+        self.logger.debug("current ephemeral port: %s", epf)
 
-        return res
+        if not epf:
+            return None
+
+        return int(epf["ext"])
+
+    @login_required
+    def delete_ephm_port(self, port: int) -> None:
+        """Delete ephemeral port.
+
+        Args:
+            port (int): The external port to delete.
+        """
+        res = self._request("DELETE", config.EPHEM_URL, data={"id": port})
+        self.logger.debug("ephemeral port deleted: %s", res)
 
     @login_required
     def set_matching_port(self) -> int:
@@ -209,22 +244,16 @@ class Windscribe:
         Raises:
             ValueError: If unable to set up a matching ephemeral port or if the external and internal ports do not match.
         """
-        data = {
-            # keeping port empty makes it to request matching port
-            "port": "",
-            "ctime": self.csrf["csrf_time"],
-            "ctoken": self.csrf["csrf_token"],
-        }
-        resp = self.client.post(config.SET_EPHEM_URL, data=data)
-        res = resp.json()
-        self.logger.debug("new ephimeral port set: %s", res)
+        # not asking for a specific port makes it request matching port
+        res = self._request("POST", config.EPHEM_URL)
+        self.logger.debug("new ephemeral port set: %s", res)
 
         if res["success"] != 1:
             raise ValueError("Not able to setup matching ephemeral port.")
 
         # lets make sure we actually had matching port
-        external: int = res["epf"]["ext"]
-        internal: int = res["epf"]["int"]
+        external = int(res["epf"]["ext"])
+        internal = int(res["epf"]["int"])
 
         if external != internal:
             raise ValueError("Port setup done but matching port not found.")
@@ -234,17 +263,15 @@ class Windscribe:
     def setup(self) -> int:
         """Perform ephemeral port setup.
 
-        After login, updates the CSRF token, deletes any existing ephemeral port,
-        and sets up a new matching ephemeral port.
+        Deletes any existing ephemeral port, and sets up a new matching ephemeral port.
 
         Returns:
             int: The new matching ephemeral port.
         """
-        # after login we need to update the csrf token again,
-        # windscribe puts new csrf token in the javascript
-        self.csrf = self.renew_csrf()
+        current = self.get_ephm_port()
+        if current is not None:
+            self.delete_ephm_port(current)
 
-        _ = self.delete_ephm_port()
         return self.set_matching_port()
 
     def close(self) -> None:
