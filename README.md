@@ -1,5 +1,8 @@
 # WS-EPHEMERAL
 
+> [!ATTENTION]
+> **Disclosures:** AI and AI tooling has been used for this project revival purpose. But I (human) was in the loop to make sure it is achieving the intended goal (at least for me).
+
 > [!WARNING]
 > Please use this tool responsibly. Excessive or inappropriate
 > usage may result in temporary suspension of your account. Due to lack of
@@ -57,7 +60,7 @@ docker run \
 -e WS_DEBUG=False \
 -e WS_PASSWORD=password \
 -e WS_USERNAME=username \
--e WS_TOPT=totp_token \
+-e WS_TOTP=totp_token \
 -v /path/to/local/data:/cookie \
 dhruvinsh/ws-ephemeral:latest
 ```
@@ -77,18 +80,45 @@ docker compose up -d
 | WS_USERNAME          | WS username                                                                      |
 | WS_PASSWORD          | WS password                                                                      |
 | WS_TOTP              | WS totp token for 2fa                                                            |
-| WS_DEBUG             | Enable Debug logging                                                             |
-| WS_COOKIE_PATH       | Persistent location for the cookie. (v3.x.x only)                                |
+| WS_DEBUG             | Enable Debug logging (true or false)                                             |
+| WS_COOKIE_PATH       | Persistent directory that keeps the session between runs, mount it as a volume   |
 | QBIT_USERNAME        | QBIT username                                                                    |
 | QBIT_PASSWORD        | QBIT password                                                                    |
 | QBIT_HOST            | QBIT web address like, https://qbit.xyz.com or http://192.168.1.10               |
 | QBIT_PORT            | QBIT web port number like, 443 or 8080                                           |
 | QBIT_PRIVATE_TRACKER | get QBIT ready for private tracker by disabling dht, pex and lsd (true or false) |
+| DAYS                 | Days between two runs of the `daemon` command, default 6                         |
+| TIME                 | Time of the day to run at, HH:MM in the timezone set by `TZ`, default 02:00      |
+| CRON                 | A 5 field cron expression like `0 2 * * 1`, replaces `DAYS` and `TIME`           |
+| RUN_ON_START         | Also run once when the `daemon` starts, default true                             |
+| TZ                   | Timezone of the schedule, like `America/Toronto`, default UTC in Docker          |
 | ONESHOT              | Run and setup the code only one time so that job can be schedule externally      |
 | REQUEST_TIMEOUT      | configurable http api timeout for slow network/busy websites                     |
 
 > [!tip]
 > NOTE: for usage see [Docker Setup](#docker-setup) v2 setup guide.
+
+## Usage
+
+The docker image runs `ws-ephemeral daemon`. There are two commands, every option
+is also available as the environment variable listed above, see `--help`.
+
+```bash
+ws-ephemeral run      # rotate the port once and exit, non-zero exit code on failure
+ws-ephemeral daemon   # keep rotating it on a schedule (every DAYS days at TIME, or CRON)
+```
+
+Use `run` when something else owns the schedule, like cron or a systemd timer. For
+example, in a Docker container with the volume from above:
+
+```bash
+docker run --rm --env-file .env -v /path/to/local/data:/cookie \
+dhruvinsh/ws-ephemeral:latest ws-ephemeral run
+```
+
+Every start of the `daemon` also rotates the port, because the schedule is counted
+from the start. Pass `--no-run-on-start` (or `RUN_ON_START=false`) to wait for the
+first scheduled run instead.
 
 ## Development
 
@@ -96,14 +126,19 @@ The project uses [uv](https://docs.astral.sh/uv/) and Python 3.14.
 
 ```bash
 uv sync                          # create .venv and install dependencies (including dev)
-cd src && uv run python run.py   # run locally, needs the environment variables from above
+uv run ws-ephemeral --help       # run the cli locally, needs the environment variables from above
 uv add <package>                 # add a dependency, updates pyproject.toml and uv.lock
+uv run pytest                    # tests, they never touch the network
 uv run ruff check                # lint
 uv run ruff format               # format
 uv run pyrefly check             # type check
-uv run prek install              # run the checks above automatically before each commit
+uv run prek install              # run the checks before each commit, and the tests before each push
 uv run prek run --all-files      # run all pre-commit hooks on every file
 ```
+
+The code lives in `src/ws_ephemeral`: `cli.py` (typer commands), `job.py` (one
+port rotation), `scheduler.py` (APScheduler), `windscribe.py` (the API client) and
+`qbit.py`. CI runs the same checks as the hooks.
 
 ## Unraid Setup
 

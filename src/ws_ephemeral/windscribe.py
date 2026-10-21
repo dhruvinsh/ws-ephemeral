@@ -5,19 +5,24 @@ allowing users to manage ephemeral ports and handle authentication.
 """
 
 import logging
+from pathlib import Path
 from types import TracebackType
 from typing import Any, final
 
 import httpx
 import pyotp
 
-import config
-from lib.decorators import login_required
-
-from .cookie import load_token, save_token
+from . import config
+from .token_cache import load_token, save_token
 
 # error codes returned by the API when the session token is missing/rejected
 _SESSION_ERROR_CODES = {500, 701}
+
+# extra help for the login errors people run into most
+_LOGIN_HINTS = {
+    702: "check WS_USERNAME, WS_PASSWORD and WS_TOTP",
+    1340: "this account uses 2FA, set WS_TOTP",
+}
 
 
 class WindscribeError(Exception):
@@ -43,28 +48,39 @@ class Windscribe:
         username (str): The username for authentication.
         password (str): The password for authentication.
         totp (str | None): The TOTP secret for 2FA, if available.
+        cookie_file (Path): Where the session token is cached.
         logger (logging.Logger): Logger for the class.
     """
 
     # pylint: disable=redefined-outer-name
-    def __init__(self, username: str, password: str, totp: str | None = None) -> None:
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        totp: str | None = None,
+        *,
+        cookie_file: Path,
+        timeout: float | None = 5,
+        client: httpx.Client | None = None,
+    ) -> None:
         headers = {
             "origin": config.BASE_URL.rstrip("/"),
             "referer": config.BASE_URL,
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",  # ruff: noqa: E501
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
         }
 
-        self.token: str | None = load_token()
-        self._is_authenticated = self.token is not None
+        self.cookie_file = cookie_file
+        self.token: str | None = load_token(cookie_file)
 
-        self.client = httpx.Client(headers=headers, timeout=config.REQUEST_TIMEOUT)
+        # a client can be passed in, so that the API can be faked in tests
+        self.client = client or httpx.Client(headers=headers, timeout=timeout)
         self.username = username
         self.password = password
         self.totp = totp
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def __enter__(self) -> "Windscribe":
+    def __enter__(self) -> Windscribe:
         """Context manager entry.
 
         Returns:
@@ -74,7 +90,7 @@ class Windscribe:
 
     def __exit__(
         self,
-        exc_type: BaseException | None,
+        exc_type: type[BaseException] | None,
         exc_value: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
@@ -83,29 +99,11 @@ class Windscribe:
         Closes the HTTP client session.
 
         Args:
-            exc_type (BaseException | None): The exception type, if any.
+            exc_type (type[BaseException] | None): The exception type, if any.
             exc_value (BaseException | None): The exception value, if any.
             traceback (TracebackType | None): The traceback, if any.
         """
         self.close()
-
-    @property
-    def is_authenticated(self) -> bool:
-        """Check if session is authenticated.
-
-        Returns:
-            bool: True if authenticated, False otherwise.
-        """
-        return self._is_authenticated
-
-    @is_authenticated.setter
-    def is_authenticated(self, value: bool) -> None:
-        """Set authentication status.
-
-        Args:
-            value (bool): The new authentication status.
-        """
-        self._is_authenticated = value
 
     @staticmethod
     def _data(resp: httpx.Response) -> dict[str, Any]:
@@ -134,11 +132,8 @@ class Windscribe:
 
         return body["data"]
 
-    def _request(self, method: str, url: str, **kwargs: Any) -> dict[str, Any]:
-        """Make an authenticated API request.
-
-        If the API rejects the session token (expired or revoked), login again once and
-        retry the request.
+    def _send(self, method: str, url: str, **kwargs: Any) -> dict[str, Any]:
+        """Make a single authenticated API request.
 
         Args:
             method (str): The HTTP method.
@@ -148,32 +143,49 @@ class Windscribe:
         Returns:
             dict[str, Any]: The `data` part of the response.
         """
-        for attempt in (1, 2):
-            headers = {"authorization": f"Bearer {self.token or 'anonymous'}"}
-            if method != "GET":
-                kwargs["data"] = {
-                    "session_auth_hash": self.token,
-                    **kwargs.get("data", {}),
-                }
-            resp = self.client.request(method, url, headers=headers, **kwargs)
+        headers = {"authorization": f"Bearer {self.token}"}
+        if method != "GET":
+            kwargs["data"] = {"session_auth_hash": self.token, **kwargs.get("data", {})}
 
-            try:
-                return self._data(resp)
-            except WindscribeError as exc:
-                if exc.code not in _SESSION_ERROR_CODES or attempt == 2:
-                    raise
+        resp = self.client.request(method, url, headers=headers, **kwargs)
+        return self._data(resp)
 
-                self.logger.warning("session rejected (%s), logging in again", exc)
-                self.login()
+    def _request(self, method: str, url: str, **kwargs: Any) -> dict[str, Any]:
+        """Make an authenticated API request.
 
-        raise AssertionError("unreachable")
+        Logs in first if there is no session yet. If the API rejects the session
+        token (expired or revoked), logs in again once and retries the request.
 
-    def login(self) -> None:
-        """Login to Windscribe.
+        Args:
+            method (str): The HTTP method.
+            url (str): The API url.
+            **kwargs: Passed to the httpx request, `data` gets the session token added.
+
+        Returns:
+            dict[str, Any]: The `data` part of the response.
+        """
+        if self.token is None:
+            self.logger.info("no cached session, logging in")
+            self.login()
+
+        try:
+            return self._send(method, url, **kwargs)
+        except WindscribeError as exc:
+            if exc.code not in _SESSION_ERROR_CODES:
+                raise
+            self.logger.warning("session rejected (%s), logging in again", exc)
+
+        self.login()
+        return self._send(method, url, **kwargs)
+
+    def _login(self) -> str:
+        """Do the two step login.
 
         Fetches a one time login token and exchanges it, together with the credentials
-        and TOTP code (if available), for a session token. The session token is saved
-        for the future use.
+        and TOTP code (if available), for a session token.
+
+        Returns:
+            str: The session token.
         """
         resp = self.client.post(
             config.AUTH_TOKEN_URL,
@@ -199,15 +211,37 @@ class Windscribe:
             json=payload,
             headers={"authorization": "Bearer anonymous"},
         )
-        session = self._data(resp)
+        return self._data(resp)["session_auth_hash"]
 
-        self.token = session["session_auth_hash"]
-        save_token(self.token)
+    def login(self) -> None:
+        """Login to Windscribe.
 
-        self.is_authenticated = True
+        The session token is saved for the future use, failing to save it is not fatal.
+
+        Raises:
+            WindscribeError: If the login was rejected.
+        """
+        try:
+            token = self._login()
+        except WindscribeError as exc:
+            hint = _LOGIN_HINTS.get(exc.code) if exc.code is not None else None
+            if hint is None:
+                raise
+            raise WindscribeError(exc.code, f"{exc.message} ({hint})") from exc
+
+        self.token = token
         self.logger.debug("login successful")
 
-    @login_required
+        # the token is only a cache, failing to save it should not stop the run
+        try:
+            save_token(self.cookie_file, token)
+        except OSError as exc:
+            self.logger.warning(
+                "could not save session token to %s, will login again next time: %s",
+                self.cookie_file,
+                exc,
+            )
+
     def get_ephm_port(self) -> int | None:
         """Get the current ephemeral port.
 
@@ -222,7 +256,6 @@ class Windscribe:
 
         return int(epf["ext"])
 
-    @login_required
     def delete_ephm_port(self, port: int) -> None:
         """Delete ephemeral port.
 
@@ -232,7 +265,6 @@ class Windscribe:
         res = self._request("DELETE", config.EPHEM_URL, data={"id": port})
         self.logger.debug("ephemeral port deleted: %s", res)
 
-    @login_required
     def set_matching_port(self) -> int:
         """Set matching ephemeral port.
 

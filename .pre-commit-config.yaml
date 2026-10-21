@@ -1,7 +1,8 @@
-# Run with prek (https://github.com/j178/prek), install the git hook with:
+# Run with prek (https://github.com/j178/prek), install the git hooks with:
 #   uv run prek install
 # Run on everything with:
 #   uv run prek run --all-files
+default_install_hook_types: [pre-commit, pre-push]
 exclude: ^(LICENSE\.md|CHANGELOG\.md|uv\.lock)$
 
 repos:
@@ -15,8 +16,8 @@ repos:
       - id: check-merge-conflict
       - id: check-added-large-files
 
-  # ruff and pyrefly come from the project environment (uv.lock), so the hooks
-  # always run the same versions as `uv run ruff` / `uv run pyrefly`.
+  # ruff, pyrefly and pytest come from the project environment (uv.lock), so the
+  # hooks always run the same versions as `uv run ruff` / `uv run pyrefly`.
   - repo: local
     hooks:
       - id: ruff-check
@@ -45,3 +46,12 @@ repos:
         language: system
         files: ^(pyproject\.toml|uv\.lock)$
         pass_filenames: false
+
+      # the tests never touch the network, but they are slower than the checks above
+      - id: pytest
+        name: pytest
+        entry: uv run --frozen pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

@@ -18,22 +18,22 @@ class QbitManager:
         self.client = Client(host, port, username, password, SIMPLE_RESPONSES=True)
         try:
             self.api = Version.parse(self.client.app_web_api_version())
-        except Exception as e:
+        except Exception:
             self.logger.error("cannot work with qbit.")
-            raise e
+            raise
 
-    def __getattribute__(self, __name: str) -> Any:
+    def __getattribute__(self, name: str) -> Any:
         """
         protector to make sure correct qbit web api supported
         """
-        if __name in ["set_listen_port", "setup_private_tracker"]:
+        if name in ["set_listen_port", "setup_private_tracker"]:
             self.logger.debug("API version: %s", self.api)
             if self.api.minor < 6:
                 raise ValueError(
                     "Cannot work with qbit, minimum required version is: 4.0.0"
                 )
 
-        return object.__getattribute__(self, __name)
+        return object.__getattribute__(self, name)
 
     def set_listen_port(self, port: int) -> bool:
         """
