@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import pytest
@@ -7,6 +8,8 @@ from ws_ephemeral import cli
 from ws_ephemeral.config import QbitSettings, Settings
 
 runner = CliRunner()
+
+ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
 CREDS = {"WS_USERNAME": "user", "WS_PASSWORD": "secret-pw"}
 
@@ -53,7 +56,8 @@ def test_command_help_needs_no_credentials(rec: Recorder) -> None:
     result = runner.invoke(cli.app, ["daemon", "--help"])
 
     assert result.exit_code == 0
-    assert "--cron" in result.output
+    # typer forces rich styling under GITHUB_ACTIONS, which splits "--cron" with escapes
+    assert "--cron" in ANSI.sub("", result.output)
 
 
 def test_version(rec: Recorder) -> None:
