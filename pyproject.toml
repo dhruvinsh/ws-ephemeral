@@ -1,31 +1,51 @@
-[tool.poetry]
+[project]
 name = "ws-ephemeral"
-version = "2.1.0"
+version = "3.2.0"
 description = "request matching ephemeral port"
-authors = ["Dhruvin Shah <dhruvin3@gmail.com>"]
+authors = [{ name = "Dhruvin Shah", email = "dhruvin3@gmail.com" }]
+requires-python = ">=3.14"
+dependencies = [
+    "httpx>=0.23.0",
+    "qbittorrent-api>=2023.3.44",
+    "pyyaml>=6.0.3,<7",
+    "semver>=3.0.0,<4",
+    "schedule>=1.2.0,<2",
+    "pyotp>=2.9.0,<3",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-httpx = ">=0.23.0"
-qbittorrent-api = ">=2023.3.44"
-tqdm = "^4.65.0"
-pyyaml = "^6.0"
-semver = "^3.0.0"
-schedule = "^1.2.0"
-pyotp = "^2.9.0"
+[dependency-groups]
+dev = [
+    "ruff>=0.14",
+    "pyrefly>=0.40",
+    "types-pyyaml>=6.0.12.9,<7",
+    "prek>=0.5.6",
+]
 
-[tool.poetry.group.dev.dependencies]
-tqdm-stubs = ">=0.2.1"
-mypy = ">=0.971"
-black = ">=22.6.0"
-pylint = ">=2.14.5"
-isort = ">=5.10.1"
-types-pyyaml = "^6.0.12.9"
+[tool.uv]
+# application, not a library: only install the dependencies, not the project itself
+package = false
 
-[tool.pylint.basic]
-good-names = ["ws"]
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+src = ["src"]
 
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "C4",  # flake8-comprehensions
+]
+# long strings and docstrings are fine, `ruff format` handles the code
+ignore = ["E501"]
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.pyrefly]
+python-version = "3.14"
+project-includes = ["src"]
+# the modules import each other as top level (`import config`), like run.py does
+search-path = ["src"]

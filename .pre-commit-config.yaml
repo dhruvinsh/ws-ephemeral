@@ -1,25 +1,47 @@
+# Run with prek (https://github.com/j178/prek), install the git hook with:
+#   uv run prek install
+# Run on everything with:
+#   uv run prek run --all-files
+exclude: ^(LICENSE\.md|CHANGELOG\.md|uv\.lock)$
+
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+  - repo: builtin
     hooks:
-    -   id: check-added-large-files
-    -   id: check-toml
-    -   id: check-yaml
-        args:
-        -   --unsafe
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.6.2
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+
+  # ruff and pyrefly come from the project environment (uv.lock), so the hooks
+  # always run the same versions as `uv run ruff` / `uv run pyrefly`.
+  - repo: local
     hooks:
-    -   id: ruff
-        args:
-        - --fix
-    -   id: ruff-format
-  - repo: https://github.com/python-poetry/poetry
-    rev: '1.8.0'
-    hooks:
-      - id: poetry-check
-      - id: poetry-lock
-      - id: poetry-export
-        args: ["-f", "requirements.txt", "-o", "requirements.txt"]
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --frozen ruff check --fix --exit-non-zero-on-fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --frozen ruff format
+        language: system
+        types: [python]
+
+      - id: pyrefly
+        name: pyrefly check
+        entry: uv run --frozen pyrefly check
+        language: system
+        types: [python]
+        # type checking needs the whole project, not just the staged files
+        pass_filenames: false
+
+      - id: uv-lock
+        name: uv lock is up to date
+        entry: uv lock --check
+        language: system
+        files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false

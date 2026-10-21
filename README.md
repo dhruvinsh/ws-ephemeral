@@ -90,6 +90,21 @@ docker compose up -d
 > [!tip]
 > NOTE: for usage see [Docker Setup](#docker-setup) v2 setup guide.
 
+## Development
+
+The project uses [uv](https://docs.astral.sh/uv/) and Python 3.14.
+
+```bash
+uv sync                          # create .venv and install dependencies (including dev)
+cd src && uv run python run.py   # run locally, needs the environment variables from above
+uv add <package>                 # add a dependency, updates pyproject.toml and uv.lock
+uv run ruff check                # lint
+uv run ruff format               # format
+uv run pyrefly check             # type check
+uv run prek install              # run the checks above automatically before each commit
+uv run prek run --all-files      # run all pre-commit hooks on every file
+```
+
 ## Unraid Setup
 
 Unraid template is now available under community application.
