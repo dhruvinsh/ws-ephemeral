@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.0.0-rc.1] - 2026-10-24
+## [4.0.0] - 2026-10-24
 
 ### ⚠️ Deprecations
 
@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Improve documentation and docstrings for Windscribe module and related files
 - Warning added
 - Update README with warning and project status note
+- Deprecate ONESHOT in favor of run command
 
 ### 🚜 Refactor
 
