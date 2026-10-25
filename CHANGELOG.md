@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.0.0-rc.1] - 2026-10-24
 
+### ⚠️ Deprecations
+
+- `ONESHOT` is deprecated, use the `ws-ephemeral run` command instead. `ONESHOT=true` still runs once and exits with the default image command (`ws-ephemeral daemon`), but it will be removed in a future release
+
 ### 📚 Documentation
 
 - Improve documentation and docstrings for Windscribe module and related files

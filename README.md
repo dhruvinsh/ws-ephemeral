@@ -11,9 +11,6 @@
 > might fail at the beginning, please try again after some time once you delete
 > partially created cookie.
 
-> [!NOTE]
-> **Current State of the Project:** There are upstream web changes affecting this project. I am also suffering from issue and I would like implement fixes but lack of time its not possible at the moment. I plan to get back to it as soon as possible.
-
 This project aims to automate setting up ephemeral port on Windscribe VPN
 service for the purpose of port forwarding. Once the setup is done it wait
 patiently for next seven days. It delete the ephemeral port setting if any and
@@ -21,9 +18,6 @@ set the new one. Useful for some torrent application which are running behind
 Windscribe VPN and need to open the ports.
 
 ## Docker Setup
-
-> [!important]
-> NOTE: V1 is deprecated and should not be used.
 
 ### Registries
 
@@ -49,7 +43,6 @@ Available tags for docker image (based on semver):
 
 ```bash
 docker run \
--e ONESHOT=false \
 -e QBIT_HOST=http://192.168.1.10 \
 -e QBIT_PASSWORD=password \
 -e QBIT_PORT=8080 \
@@ -92,11 +85,7 @@ docker compose up -d
 | CRON                 | A 5 field cron expression like `0 2 * * 1`, replaces `DAYS` and `TIME`           |
 | RUN_ON_START         | Also run once when the `daemon` starts, default true                             |
 | TZ                   | Timezone of the schedule, like `America/Toronto`, default UTC in Docker          |
-| ONESHOT              | Run and setup the code only one time so that job can be schedule externally      |
 | REQUEST_TIMEOUT      | configurable http api timeout for slow network/busy websites                     |
-
-> [!tip]
-> NOTE: for usage see [Docker Setup](#docker-setup) v2 setup guide.
 
 ## Usage
 
@@ -119,6 +108,19 @@ dhruvinsh/ws-ephemeral:latest ws-ephemeral run
 Every start of the `daemon` also rotates the port, because the schedule is counted
 from the start. Pass `--no-run-on-start` (or `RUN_ON_START=false`) to wait for the
 first scheduled run instead.
+
+> [!IMPORTANT]
+> **`ONESHOT` is deprecated since v4.** Use the `run` command instead:
+>
+> ```bash
+> docker run --rm --env-file .env -v /path/to/local/data:/cookie \
+> dhruvinsh/ws-ephemeral:latest ws-ephemeral run
+> ```
+>
+> For now `ONESHOT=true` still runs once and exits with the default image command
+> (`ws-ephemeral daemon`), but it will be removed in a future release. It is not
+> read by the `run` command, and it does nothing when you override the image
+> command with anything other than `daemon`.
 
 ## Development
 
