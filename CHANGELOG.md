@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0-rc.1] - 2026-10-24
+
+### 📚 Documentation
+
+- Improve documentation and docstrings for Windscribe module and related files
+- Warning added
+- Update README with warning and project status note
+
+### 🚜 Refactor
+
+- *(ws)* Do not use Union
+- *(typing)* Improve type annotations and code structure
+- *(ws)* Migrate from web scraping to Windscribe API
+- [**breaking**] Restructure into ws_ephemeral package with typer cli
+
+### 🧪 Testing
+
+- Add unit tests for cli, job, scheduler, and windscribe
+- *(cli)* Strip ANSI codes when asserting help output
+
+### ⚙️ Miscellaneous Tasks
+
+- Fixing lint error for constant
+- Spell corrections
+- *(env)* Poetry to uv and pre-commit to prek
+
 ## [3.2.0] - 2024-08-26
 
 ### 🚀 Features
