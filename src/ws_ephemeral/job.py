@@ -1,6 +1,7 @@
 """The job: rotate the Windscribe ephemeral port and tell qBittorrent about it."""
 
 import logging
+import threading
 
 from .config import Settings
 from .gluetun import sync_port
@@ -9,8 +10,17 @@ from .windscribe import Windscribe, WindscribeError
 
 logger = logging.getLogger(__name__)
 
+# Serialize port rotation and periodic Gluetun synchronization.
+_gluetun_sync_lock = threading.Lock()
+
 
 def rotate_port(settings: Settings) -> int:
+    """Setup a new matching ephemeral port and hand it over to qBittorrent."""
+    with _gluetun_sync_lock:
+        return _rotate_port_locked(settings)
+
+
+def _rotate_port_locked(settings: Settings) -> int:
     """Setup a new matching ephemeral port and hand it over to qBittorrent.
 
     Steps:
@@ -60,7 +70,7 @@ def rotate_port(settings: Settings) -> int:
     if not qbit.set_listen_port(port):
         logger.warning("qBittorrent did not report the new port %s", port)
     elif settings.gluetun is not None and not sync_port(port, settings.gluetun):
-        logger.warning("Gluetun firewall synchronization failed for port %s", port)
+        raise RuntimeError(f"Gluetun firewall synchronization failed for port {port}")
 
     if qbit_settings.private_tracker and not qbit.setup_private_tracker():
         logger.warning("qBittorrent still has dht, pex or lsd enabled")
@@ -70,6 +80,12 @@ def rotate_port(settings: Settings) -> int:
 
 def sync_current_port(settings: Settings) -> bool:
     """Reapply the current qBittorrent port to Gluetun's firewall."""
+    with _gluetun_sync_lock:
+        return _sync_current_port_locked(settings)
+
+
+def _sync_current_port_locked(settings: Settings) -> bool:
+    """Read and synchronize the current port while holding the shared lock."""
     if settings.gluetun is None:
         return True
 
