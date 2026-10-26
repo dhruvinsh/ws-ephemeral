@@ -86,6 +86,10 @@ docker compose up -d
 | RUN_ON_START         | Also run once when the `daemon` starts, default true                             |
 | TZ                   | Timezone of the schedule, like `America/Toronto`, default UTC in Docker          |
 | REQUEST_TIMEOUT      | configurable http api timeout for slow network/busy websites                     |
+| GLUETUN_URL          | Gluetun control API URL, default `http://gluetun:8000`                            |
+| GLUETUN_API_KEY      | Gluetun API key; enables the optional Gluetun integration                         |
+| GLUETUN_FIXED_PORTS  | Comma-separated list of fixed ports to preserve, e.g. `8080,6881`                |
+| GLUETUN_SYNC_INTERVAL| Seconds between periodic firewall checks, default 900; `0` disables these checks |
 
 ## Usage
 

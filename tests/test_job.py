@@ -111,3 +111,38 @@ def test_run_job_reports_a_windscribe_error(
     monkeypatch.setattr(job, "rotate_port", rejected)
 
     assert job.run_job(Settings(WS, None)) is False
+
+
+def test_new_port_is_synced_to_gluetun(
+    events: list[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from ws_ephemeral.config import GluetunSettings
+
+    gluetun_settings = GluetunSettings(
+        url="http://gluetun:8000",
+        api_key="test-secret",
+        fixed_ports=(8080, 6881),
+    )
+    synced: list[tuple[int, GluetunSettings]] = []
+
+    def fake_sync(port: int, settings: GluetunSettings) -> bool:
+        synced.append((port, settings))
+        return True
+
+    monkeypatch.setattr(job, "sync_port", fake_sync)
+
+    assert job.rotate_port(Settings(WS, QBIT, gluetun_settings)) == 4242
+    assert synced == [(4242, gluetun_settings)]
+
+
+def test_new_port_does_not_sync_gluetun_when_unconfigured(
+    events: list[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def unexpected_sync(*_: object) -> bool:
+        raise AssertionError("Gluetun should not be called")
+
+    monkeypatch.setattr(job, "sync_port", unexpected_sync)
+
+    assert job.rotate_port(Settings(WS, QBIT)) == 4242

@@ -38,8 +38,19 @@ class QbitSettings:
 
 
 @dataclass(frozen=True, slots=True)
+class GluetunSettings:
+    """Everything needed to synchronize Gluetun's firewall."""
+
+    url: str
+    api_key: str = field(repr=False)
+    fixed_ports: tuple[int, ...]
+    sync_interval_seconds: int = 900
+
+
+@dataclass(frozen=True, slots=True)
 class Settings:
     """All settings of a single run, `qbit` is None when qBittorrent isn't set up."""
 
     windscribe: WindscribeSettings
     qbit: QbitSettings | None
+    gluetun: GluetunSettings | None = None

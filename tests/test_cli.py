@@ -195,3 +195,71 @@ def test_daemon_rejects_bad_schedules(rec: Recorder, args: list[str]) -> None:
 
     assert result.exit_code == 2
     assert not rec.served
+
+
+@pytest.mark.parametrize(
+    ("interval", "expected_seconds"),
+    [("900", 900), ("60", 60)],
+)
+def test_daemon_configures_gluetun_sync_interval(
+    rec: Recorder,
+    monkeypatch: pytest.MonkeyPatch,
+    interval: str,
+    expected_seconds: int,
+) -> None:
+    jobs: list[dict[str, object]] = []
+
+    class FakeScheduler:
+        def add_job(self, func: object, **kwargs: object) -> None:
+            jobs.append(kwargs)
+
+    scheduler = FakeScheduler()
+    monkeypatch.setattr(cli, "build_scheduler", lambda *_args, **_kwargs: scheduler)
+
+    result = runner.invoke(
+        cli.app,
+        ["daemon"],
+        env=CREDS
+        | {
+            "QBIT_USERNAME": "qbit-user",
+            "QBIT_PASSWORD": "qbit-password",
+            "GLUETUN_API_KEY": "test-secret",
+            "GLUETUN_FIXED_PORTS": "8080,6881",
+            "GLUETUN_SYNC_INTERVAL": interval,
+        },
+    )
+
+    assert result.exit_code == 0, result.output
+    gluetun_jobs = [job for job in jobs if job.get("id") == "sync-gluetun-firewall"]
+    assert len(gluetun_jobs) == 1
+    assert gluetun_jobs[0]["seconds"] == expected_seconds
+
+
+def test_daemon_disables_periodic_gluetun_sync_when_interval_is_zero(
+    rec: Recorder,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    jobs: list[dict[str, object]] = []
+
+    class FakeScheduler:
+        def add_job(self, func: object, **kwargs: object) -> None:
+            jobs.append(kwargs)
+
+    scheduler = FakeScheduler()
+    monkeypatch.setattr(cli, "build_scheduler", lambda *_args, **_kwargs: scheduler)
+
+    result = runner.invoke(
+        cli.app,
+        ["daemon"],
+        env=CREDS
+        | {
+            "QBIT_USERNAME": "qbit-user",
+            "QBIT_PASSWORD": "qbit-password",
+            "GLUETUN_API_KEY": "test-secret",
+            "GLUETUN_FIXED_PORTS": "8080,6881",
+            "GLUETUN_SYNC_INTERVAL": "0",
+        },
+    )
+
+    assert result.exit_code == 0, result.output
+    assert all(job.get("id") != "sync-gluetun-firewall" for job in jobs)

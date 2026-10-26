@@ -3,6 +3,7 @@
 import logging
 
 from .config import Settings
+from .gluetun import sync_port
 from .qbit import QbitManager
 from .windscribe import Windscribe, WindscribeError
 
@@ -58,11 +59,40 @@ def rotate_port(settings: Settings) -> int:
 
     if not qbit.set_listen_port(port):
         logger.warning("qBittorrent did not report the new port %s", port)
+    elif settings.gluetun is not None and not sync_port(port, settings.gluetun):
+        logger.warning("Gluetun firewall synchronization failed for port %s", port)
 
     if qbit_settings.private_tracker and not qbit.setup_private_tracker():
         logger.warning("qBittorrent still has dht, pex or lsd enabled")
 
     return port
+
+
+def sync_current_port(settings: Settings) -> bool:
+    """Reapply the current qBittorrent port to Gluetun's firewall."""
+    if settings.gluetun is None:
+        return True
+
+    qbit_settings = settings.qbit
+    if qbit_settings is None:
+        logger.warning("Cannot sync Gluetun: qBittorrent is not configured")
+        return False
+
+    try:
+        qbit = QbitManager(
+            host=qbit_settings.host,
+            port=qbit_settings.port,
+            username=qbit_settings.username,
+            password=qbit_settings.password,
+        )
+        port = int(qbit.client.application.preferences["listen_port"])
+        return sync_port(port, settings.gluetun)
+    except Exception:
+        logger.warning(
+            "Could not read qBittorrent port or synchronize Gluetun",
+            exc_info=True,
+        )
+        return False
 
 
 def run_job(settings: Settings) -> bool:
