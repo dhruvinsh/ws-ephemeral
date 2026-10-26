@@ -13,8 +13,14 @@ from typing import Annotated
 
 import typer
 
-from .config import COOKIE_FILE_NAME, QbitSettings, Settings, WindscribeSettings
-from .job import run_job
+from .config import (
+    COOKIE_FILE_NAME,
+    GluetunSettings,
+    QbitSettings,
+    Settings,
+    WindscribeSettings,
+)
+from .job import run_job, sync_current_port
 from .log import setup_logging
 from .scheduler import build_scheduler, serve
 
@@ -43,6 +49,10 @@ class _Options:
     qbit_username: str | None
     qbit_password: str | None = field(repr=False)
     qbit_private_tracker: bool
+    gluetun_url: str
+    gluetun_api_key: str | None = field(repr=False)
+    gluetun_fixed_ports: str | None
+    gluetun_sync_interval: int
 
 
 def _show_version(value: bool) -> None:
@@ -108,6 +118,29 @@ def main(
             "and lsd.",
         ),
     ] = False,
+    gluetun_url: Annotated[
+        str,
+        typer.Option(envvar="GLUETUN_URL", help="Gluetun control API URL."),
+    ] = "http://gluetun:8000",
+    gluetun_api_key: Annotated[
+        str | None,
+        typer.Option(envvar="GLUETUN_API_KEY", help="Gluetun API key."),
+    ] = None,
+    gluetun_fixed_ports: Annotated[
+        str | None,
+        typer.Option(
+            envvar="GLUETUN_FIXED_PORTS",
+            help="Comma-separated Gluetun ports to preserve when syncing.",
+        ),
+    ] = None,
+    gluetun_sync_interval: Annotated[
+        int,
+        typer.Option(
+            envvar="GLUETUN_SYNC_INTERVAL",
+            min=0,
+            help="Seconds between Gluetun firewall checks; 0 disables periodic checks.",
+        ),
+    ] = 900,
     debug: Annotated[
         bool,
         typer.Option("--debug/--no-debug", envvar="WS_DEBUG", help="Debug logging."),
@@ -139,6 +172,10 @@ def main(
         qbit_username=qbit_username,
         qbit_password=qbit_password,
         qbit_private_tracker=qbit_private_tracker,
+        gluetun_url=gluetun_url,
+        gluetun_api_key=gluetun_api_key,
+        gluetun_fixed_ports=gluetun_fixed_ports,
+        gluetun_sync_interval=gluetun_sync_interval,
     )
 
 
@@ -163,6 +200,40 @@ def _settings(ctx: typer.Context) -> Settings:
             private_tracker=opts.qbit_private_tracker,
         )
 
+    gluetun = None
+    if opts.gluetun_api_key:
+        if qbit is None:
+            raise typer.BadParameter(
+                "Gluetun integration requires QBIT_USERNAME and QBIT_PASSWORD"
+            )
+        if opts.gluetun_fixed_ports is None:
+            raise typer.BadParameter(
+                "GLUETUN_FIXED_PORTS must list the fixed ports to preserve"
+            )
+        try:
+            fixed_ports = tuple(
+                sorted(
+                    {
+                        int(value.strip())
+                        for value in opts.gluetun_fixed_ports.split(",")
+                        if value.strip()
+                    }
+                )
+            )
+            if any(port < 1 or port > 65535 for port in fixed_ports):
+                raise ValueError("port outside valid range")
+        except ValueError as exc:
+            raise typer.BadParameter(
+                "GLUETUN_FIXED_PORTS must be a comma-separated list of ports "
+                "between 1 and 65535"
+            ) from exc
+        gluetun = GluetunSettings(
+            url=opts.gluetun_url,
+            api_key=opts.gluetun_api_key,
+            fixed_ports=fixed_ports,
+            sync_interval_seconds=opts.gluetun_sync_interval,
+        )
+
     return Settings(
         windscribe=WindscribeSettings(
             username=opts.ws_username,
@@ -172,6 +243,7 @@ def _settings(ctx: typer.Context) -> Settings:
             timeout=None if opts.request_timeout == -1 else opts.request_timeout,
         ),
         qbit=qbit,
+        gluetun=gluetun,
     )
 
 
@@ -244,5 +316,16 @@ def daemon(
         )
     except ValueError as exc:
         raise typer.BadParameter(str(exc)) from exc
+
+    # Reapply the current qBittorrent port in case Gluetun restarted.
+    if settings.gluetun is not None and settings.gluetun.sync_interval_seconds > 0:
+        scheduler.add_job(
+            functools.partial(sync_current_port, settings),
+            trigger="interval",
+            seconds=settings.gluetun.sync_interval_seconds,
+            id="sync-gluetun-firewall",
+            max_instances=1,
+            coalesce=True,
+        )
 
     serve(scheduler)
